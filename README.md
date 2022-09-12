@@ -1,5 +1,8 @@
 # Nois standard library
 
+[![nois on crates.io](https://img.shields.io/crates/v/nois.svg)](https://crates.io/crates/nois)
+[![nois on docs.rs](https://img.shields.io/docsrs/nois.svg)](https://docs.rs/nois)
+
 Use this library to integrate your app with the a nois proxy.
 
 ## Storing the proxy address
