@@ -42,7 +42,7 @@ pub fn sub_randomness_with_key(
 
 /// Takes a randomness and a key. Returns an arbitrary number of sub-randomnesses.
 ///
-/// This is equivalent to calling [`sub_randomness_with_key`] with key "_^default^_"
+/// This is equivalent to calling [`sub_randomness_with_key`] with key `b"_^default^_"`.
 pub fn sub_randomness(randomness: [u8; 32]) -> Box<SubRandomnessProvider> {
     sub_randomness_with_key(randomness, b"_^default^_")
 }

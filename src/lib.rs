@@ -13,4 +13,4 @@ pub use decimal::random_decimal;
 pub use integers::{int_in_range, ints_in_range, Int};
 pub use proxy::{NoisCallbackMsg, ProxyExecuteMsg};
 pub use shuffle::shuffle;
-pub use sub_randomness::{sub_randomness, SubRandomnessProvider};
+pub use sub_randomness::{sub_randomness, sub_randomness_with_key, SubRandomnessProvider};
