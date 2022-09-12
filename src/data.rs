@@ -9,9 +9,9 @@ use cosmwasm_std::{StdError, StdResult};
 /// Data is a wrapper around Vec<u8> to add hex de/serialization
 /// with serde. It also adds some helper methods to help encode inline.
 ///
-/// This is similar to `cosmwasm_stad::Binary` but uses hex.
+/// This is similar to `cosmwasm_std::Binary` but uses hex.
 #[derive(Clone, Default, PartialEq, Eq, Hash, PartialOrd, Ord, JsonSchema)]
-pub struct Data(#[schemars(with = "String")] pub Vec<u8>);
+pub struct Data(#[schemars(with = "String")] Vec<u8>);
 
 impl Data {
     pub fn from_hex(input: &str) -> StdResult<Self> {
