@@ -1,6 +1,7 @@
 [package]
 name = "nois"
 description = "The Nois standard library"
+repository = "https://github.com/noislabs/nois"
 version = "0.4.1"
 edition = "2021"
 license = "Apache-2.0"
