@@ -6,14 +6,14 @@ use serde::{de, ser, Deserialize, Deserializer, Serialize};
 
 use cosmwasm_std::{StdError, StdResult};
 
-/// Data is a wrapper around Vec<u8> to add hex de/serialization
+/// This is a wrapper around Vec<u8> to add hex de/serialization
 /// with serde. It also adds some helper methods to help encode inline.
 ///
 /// This is similar to `cosmwasm_std::Binary` but uses hex.
 #[derive(Clone, Default, PartialEq, Eq, Hash, PartialOrd, Ord, JsonSchema)]
-pub struct Data(#[schemars(with = "String")] Vec<u8>);
+pub struct HexBinary(#[schemars(with = "String")] Vec<u8>);
 
-impl Data {
+impl HexBinary {
     pub fn from_hex(input: &str) -> StdResult<Self> {
         let vec =
             hex::decode(input).map_err(|e| StdError::generic_err(format!("Invalid hex: {e}")))?;
@@ -35,8 +35,8 @@ impl Data {
     /// Copy to array of explicit length
     ///
     /// ```
-    /// # use nois::Data;
-    /// let data = Data::from(&[0xfb, 0x1f, 0x37]);
+    /// # use nois::HexBinary;
+    /// let data = HexBinary::from(&[0xfb, 0x1f, 0x37]);
     /// let array: [u8; 3] = data.to_array().unwrap();
     /// assert_eq!(array, [0xfb, 0x1f, 0x37]);
     /// ```
@@ -44,8 +44,8 @@ impl Data {
     /// Copy to integer
     ///
     /// ```
-    /// # use nois::Data;
-    /// let data = Data::from(&[0x8b, 0x67, 0x64, 0x84, 0xb5, 0xfb, 0x1f, 0x37]);
+    /// # use nois::HexBinary;
+    /// let data = HexBinary::from(&[0x8b, 0x67, 0x64, 0x84, 0xb5, 0xfb, 0x1f, 0x37]);
     /// let num = u64::from_be_bytes(data.to_array().unwrap());
     /// assert_eq!(num, 10045108015024774967);
     /// ```
@@ -60,17 +60,17 @@ impl Data {
     }
 }
 
-impl fmt::Display for Data {
+impl fmt::Display for HexBinary {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.to_hex())
     }
 }
 
-impl fmt::Debug for Data {
+impl fmt::Debug for HexBinary {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // Use an output inspired by tuples (https://doc.rust-lang.org/std/fmt/struct.Formatter.html#method.debug_tuple)
         // but with a custom implementation to avoid the need for an intemediate hex string.
-        write!(f, "Data(")?;
+        write!(f, "HexBinary(")?;
         for byte in self.0.iter() {
             write!(f, "{:02x}", byte)?;
         }
@@ -79,18 +79,18 @@ impl fmt::Debug for Data {
     }
 }
 
-impl From<&[u8]> for Data {
+impl From<&[u8]> for HexBinary {
     fn from(binary: &[u8]) -> Self {
         Self(binary.to_vec())
     }
 }
 
-/// Just like Vec<u8>, Data is a smart pointer to [u8].
+/// Just like Vec<u8>, HexBinary is a smart pointer to [u8].
 /// This implements `*data` for us and allows us to
-/// do `&*data`, returning a `&[u8]` from a `&Data`.
+/// do `&*data`, returning a `&[u8]` from a `&HexBinary`.
 /// With [deref coercions](https://doc.rust-lang.org/1.22.1/book/first-edition/deref-coercions.html#deref-coercions),
 /// this allows us to use `&data` whenever a `&[u8]` is required.
-impl Deref for Data {
+impl Deref for HexBinary {
     type Target = [u8];
 
     fn deref(&self) -> &Self::Target {
@@ -99,93 +99,93 @@ impl Deref for Data {
 }
 
 // Reference
-impl<const LENGTH: usize> From<&[u8; LENGTH]> for Data {
+impl<const LENGTH: usize> From<&[u8; LENGTH]> for HexBinary {
     fn from(source: &[u8; LENGTH]) -> Self {
         Self(source.to_vec())
     }
 }
 
 // Owned
-impl<const LENGTH: usize> From<[u8; LENGTH]> for Data {
+impl<const LENGTH: usize> From<[u8; LENGTH]> for HexBinary {
     fn from(source: [u8; LENGTH]) -> Self {
         Self(source.into())
     }
 }
 
-impl From<Vec<u8>> for Data {
+impl From<Vec<u8>> for HexBinary {
     fn from(vec: Vec<u8>) -> Self {
         Self(vec)
     }
 }
 
-impl From<Data> for Vec<u8> {
-    fn from(original: Data) -> Vec<u8> {
+impl From<HexBinary> for Vec<u8> {
+    fn from(original: HexBinary) -> Vec<u8> {
         original.0
     }
 }
 
-/// Implement `Data == std::vec::Vec<u8>`
-impl PartialEq<Vec<u8>> for Data {
+/// Implement `HexBinary == std::vec::Vec<u8>`
+impl PartialEq<Vec<u8>> for HexBinary {
     fn eq(&self, rhs: &Vec<u8>) -> bool {
         // Use Vec<u8> == Vec<u8>
         self.0 == *rhs
     }
 }
 
-/// Implement `std::vec::Vec<u8> == Data`
-impl PartialEq<Data> for Vec<u8> {
-    fn eq(&self, rhs: &Data) -> bool {
+/// Implement `std::vec::Vec<u8> == HexBinary`
+impl PartialEq<HexBinary> for Vec<u8> {
+    fn eq(&self, rhs: &HexBinary) -> bool {
         // Use Vec<u8> == Vec<u8>
         *self == rhs.0
     }
 }
 
-/// Implement `Data == &[u8]`
-impl PartialEq<&[u8]> for Data {
+/// Implement `HexBinary == &[u8]`
+impl PartialEq<&[u8]> for HexBinary {
     fn eq(&self, rhs: &&[u8]) -> bool {
         // Use &[u8] == &[u8]
         self.as_slice() == *rhs
     }
 }
 
-/// Implement `&[u8] == Data`
-impl PartialEq<Data> for &[u8] {
-    fn eq(&self, rhs: &Data) -> bool {
+/// Implement `&[u8] == HexBinary`
+impl PartialEq<HexBinary> for &[u8] {
+    fn eq(&self, rhs: &HexBinary) -> bool {
         // Use &[u8] == &[u8]
         *self == rhs.as_slice()
     }
 }
 
-/// Implement `Data == [u8; LENGTH]`
-impl<const LENGTH: usize> PartialEq<[u8; LENGTH]> for Data {
+/// Implement `HexBinary == [u8; LENGTH]`
+impl<const LENGTH: usize> PartialEq<[u8; LENGTH]> for HexBinary {
     fn eq(&self, rhs: &[u8; LENGTH]) -> bool {
         self.as_slice() == rhs.as_slice()
     }
 }
 
-/// Implement `[u8; LENGTH] == Data`
-impl<const LENGTH: usize> PartialEq<Data> for [u8; LENGTH] {
-    fn eq(&self, rhs: &Data) -> bool {
+/// Implement `[u8; LENGTH] == HexBinary`
+impl<const LENGTH: usize> PartialEq<HexBinary> for [u8; LENGTH] {
+    fn eq(&self, rhs: &HexBinary) -> bool {
         self.as_slice() == rhs.as_slice()
     }
 }
 
-/// Implement `Data == &[u8; LENGTH]`
-impl<const LENGTH: usize> PartialEq<&[u8; LENGTH]> for Data {
+/// Implement `HexBinary == &[u8; LENGTH]`
+impl<const LENGTH: usize> PartialEq<&[u8; LENGTH]> for HexBinary {
     fn eq(&self, rhs: &&[u8; LENGTH]) -> bool {
         self.as_slice() == rhs.as_slice()
     }
 }
 
-/// Implement `&[u8; LENGTH] == Data`
-impl<const LENGTH: usize> PartialEq<Data> for &[u8; LENGTH] {
-    fn eq(&self, rhs: &Data) -> bool {
+/// Implement `&[u8; LENGTH] == HexBinary`
+impl<const LENGTH: usize> PartialEq<HexBinary> for &[u8; LENGTH] {
+    fn eq(&self, rhs: &HexBinary) -> bool {
         self.as_slice() == rhs.as_slice()
     }
 }
 
 /// Serializes as a hex string
-impl Serialize for Data {
+impl Serialize for HexBinary {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: ser::Serializer,
@@ -195,8 +195,8 @@ impl Serialize for Data {
 }
 
 /// Deserializes as a hex string
-impl<'de> Deserialize<'de> for Data {
-    fn deserialize<D>(deserializer: D) -> Result<Data, D::Error>
+impl<'de> Deserialize<'de> for HexBinary {
+    fn deserialize<D>(deserializer: D) -> Result<HexBinary, D::Error>
     where
         D: Deserializer<'de>,
     {
@@ -207,7 +207,7 @@ impl<'de> Deserialize<'de> for Data {
 struct HexVisitor;
 
 impl<'de> de::Visitor<'de> for HexVisitor {
-    type Value = Data;
+    type Value = HexBinary;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_str("valid hex encoded string")
@@ -217,7 +217,7 @@ impl<'de> de::Visitor<'de> for HexVisitor {
     where
         E: de::Error,
     {
-        match Data::from_hex(v) {
+        match HexBinary::from_hex(v) {
             Ok(data) => Ok(data),
             Err(_) => Err(E::custom(format!("invalid hex: {}", v))),
         }
@@ -234,70 +234,70 @@ mod tests {
 
     #[test]
     fn from_hex_works() {
-        let data = Data::from_hex("").unwrap();
+        let data = HexBinary::from_hex("").unwrap();
         assert_eq!(data, b"");
-        let data = Data::from_hex("61").unwrap();
+        let data = HexBinary::from_hex("61").unwrap();
         assert_eq!(data, b"a");
-        let data = Data::from_hex("00").unwrap();
+        let data = HexBinary::from_hex("00").unwrap();
         assert_eq!(data, b"\0");
 
-        let data = Data::from_hex("68656c6c6f").unwrap();
+        let data = HexBinary::from_hex("68656c6c6f").unwrap();
         assert_eq!(data, b"hello");
-        let data = Data::from_hex("68656C6C6F").unwrap();
+        let data = HexBinary::from_hex("68656C6C6F").unwrap();
         assert_eq!(data, b"hello");
-        let data = Data::from_hex("72616e646f6d695a").unwrap();
+        let data = HexBinary::from_hex("72616e646f6d695a").unwrap();
         assert_eq!(data.as_slice(), b"randomiZ");
 
         // odd
-        match Data::from_hex("123").unwrap_err() {
+        match HexBinary::from_hex("123").unwrap_err() {
             StdError::GenericErr { msg, .. } => {
                 assert_eq!(msg, "Invalid hex: Odd number of digits")
             }
             _ => panic!("Unexpected error type"),
         }
         // non-hex
-        match Data::from_hex("efgh").unwrap_err() {
+        match HexBinary::from_hex("efgh").unwrap_err() {
             StdError::GenericErr { msg, .. } => {
                 assert_eq!(msg, "Invalid hex: Invalid character 'g' at position 2")
             }
             _ => panic!("Unexpected error type"),
         }
         // spaces
-        Data::from_hex("aa ").unwrap_err();
-        Data::from_hex(" aa").unwrap_err();
-        Data::from_hex("a a").unwrap_err();
-        Data::from_hex(" aa ").unwrap_err();
+        HexBinary::from_hex("aa ").unwrap_err();
+        HexBinary::from_hex(" aa").unwrap_err();
+        HexBinary::from_hex("a a").unwrap_err();
+        HexBinary::from_hex(" aa ").unwrap_err();
     }
 
     #[test]
     fn to_hex_works() {
         let binary: &[u8] = b"";
-        let encoded = Data::from(binary).to_hex();
+        let encoded = HexBinary::from(binary).to_hex();
         assert_eq!(encoded, "");
 
         let binary: &[u8] = b"hello";
-        let encoded = Data::from(binary).to_hex();
+        let encoded = HexBinary::from(binary).to_hex();
         assert_eq!(encoded, "68656c6c6f");
 
         let binary = vec![12u8, 187, 0, 17, 250, 1];
-        let encoded = Data(binary).to_hex();
+        let encoded = HexBinary(binary).to_hex();
         assert_eq!(encoded, "0cbb0011fa01");
     }
 
     #[test]
     fn to_array_works() {
         // simple
-        let binary = Data::from(&[1, 2, 3]);
+        let binary = HexBinary::from(&[1, 2, 3]);
         let array: [u8; 3] = binary.to_array().unwrap();
         assert_eq!(array, [1, 2, 3]);
 
         // empty
-        let binary = Data::from(&[]);
+        let binary = HexBinary::from(&[]);
         let array: [u8; 0] = binary.to_array().unwrap();
         assert_eq!(array, [] as [u8; 0]);
 
         // invalid size
-        let binary = Data::from(&[1, 2, 3]);
+        let binary = HexBinary::from(&[1, 2, 3]);
         let error = binary.to_array::<8>().unwrap_err();
         match error {
             StdError::InvalidDataSize {
@@ -311,7 +311,7 @@ mod tests {
 
         // long array (32 bytes)
         let binary =
-            Data::from_hex("b75d7d24e428c7859440498efe7caa3997cefb08c99bdd581b6b1f9f866096f0")
+            HexBinary::from_hex("b75d7d24e428c7859440498efe7caa3997cefb08c99bdd581b6b1f9f866096f0")
                 .unwrap();
         let array: [u8; 32] = binary.to_array().unwrap();
         assert_eq!(
@@ -324,7 +324,7 @@ mod tests {
         );
 
         // very long array > 32 bytes (requires Rust 1.47+)
-        let binary = Data::from_hex(
+        let binary = HexBinary::from_hex(
             "b75d7d24e428c7859440498efe7caa3997cefb08c99bdd581b6b1f9f866096f073c8c3b0316abe",
         )
         .unwrap();
@@ -342,29 +342,29 @@ mod tests {
     #[test]
     fn from_slice_works() {
         let original: &[u8] = &[0u8, 187, 61, 11, 250, 0];
-        let binary: Data = original.into();
+        let binary: HexBinary = original.into();
         assert_eq!(binary.as_slice(), [0u8, 187, 61, 11, 250, 0]);
     }
 
     #[test]
     fn from_fixed_length_array_works() {
         let original = &[];
-        let binary: Data = original.into();
+        let binary: HexBinary = original.into();
         assert_eq!(binary.len(), 0);
 
         let original = &[0u8];
-        let binary: Data = original.into();
+        let binary: HexBinary = original.into();
         assert_eq!(binary.as_slice(), [0u8]);
 
         let original = &[0u8, 187, 61, 11, 250, 0];
-        let binary: Data = original.into();
+        let binary: HexBinary = original.into();
         assert_eq!(binary.as_slice(), [0u8, 187, 61, 11, 250, 0]);
 
         let original = &[
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
             1, 1, 1,
         ];
-        let binary: Data = original.into();
+        let binary: HexBinary = original.into();
         assert_eq!(
             binary.as_slice(),
             [
@@ -377,22 +377,22 @@ mod tests {
     #[test]
     fn from_owned_fixed_length_array_works() {
         let original = [];
-        let binary: Data = original.into();
+        let binary: HexBinary = original.into();
         assert_eq!(binary.len(), 0);
 
         let original = [0u8];
-        let binary: Data = original.into();
+        let binary: HexBinary = original.into();
         assert_eq!(binary.as_slice(), [0u8]);
 
         let original = [0u8, 187, 61, 11, 250, 0];
-        let binary: Data = original.into();
+        let binary: HexBinary = original.into();
         assert_eq!(binary.as_slice(), [0u8, 187, 61, 11, 250, 0]);
 
         let original = [
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
             1, 1, 1,
         ];
-        let binary: Data = original.into();
+        let binary: HexBinary = original.into();
         assert_eq!(
             binary.as_slice(),
             [
@@ -404,22 +404,22 @@ mod tests {
 
     #[test]
     fn from_literal_works() {
-        let a: Data = b"".into();
+        let a: HexBinary = b"".into();
         assert_eq!(a.len(), 0);
 
-        let a: Data = b".".into();
+        let a: HexBinary = b".".into();
         assert_eq!(a.len(), 1);
 
-        let a: Data = b"...".into();
+        let a: HexBinary = b"...".into();
         assert_eq!(a.len(), 3);
 
-        let a: Data = b"...............................".into();
+        let a: HexBinary = b"...............................".into();
         assert_eq!(a.len(), 31);
 
-        let a: Data = b"................................".into();
+        let a: HexBinary = b"................................".into();
         assert_eq!(a.len(), 32);
 
-        let a: Data = (b".................................").into();
+        let a: HexBinary = (b".................................").into();
         assert_eq!(a.len(), 33);
     }
 
@@ -427,22 +427,22 @@ mod tests {
     fn from_vec_works() {
         let original = vec![0u8, 187, 61, 11, 250, 0];
         let original_ptr = original.as_ptr();
-        let binary: Data = original.into();
+        let binary: HexBinary = original.into();
         assert_eq!(binary.as_slice(), [0u8, 187, 61, 11, 250, 0]);
         assert_eq!(binary.0.as_ptr(), original_ptr, "vector must not be copied");
     }
 
     #[test]
     fn into_vec_works() {
-        // Into<Vec<u8>> for Data
-        let original = Data(vec![0u8, 187, 61, 11, 250, 0]);
+        // Into<Vec<u8>> for HexBinary
+        let original = HexBinary(vec![0u8, 187, 61, 11, 250, 0]);
         let original_ptr = original.0.as_ptr();
         let vec: Vec<u8> = original.into();
         assert_eq!(vec.as_slice(), [0u8, 187, 61, 11, 250, 0]);
         assert_eq!(vec.as_ptr(), original_ptr, "vector must not be copied");
 
-        // From<Data> for Vec<u8>
-        let original = Data(vec![7u8, 35, 49, 101, 0, 255]);
+        // From<HexBinary> for Vec<u8>
+        let original = HexBinary(vec![7u8, 35, 49, 101, 0, 255]);
         let original_ptr = original.0.as_ptr();
         let vec = Vec::<u8>::from(original);
         assert_eq!(vec.as_slice(), [7u8, 35, 49, 101, 0, 255]);
@@ -451,10 +451,10 @@ mod tests {
 
     #[test]
     fn serialization_works() {
-        let binary = Data(vec![0u8, 187, 61, 11, 250, 0]);
+        let binary = HexBinary(vec![0u8, 187, 61, 11, 250, 0]);
 
         let json = to_vec(&binary).unwrap();
-        let deserialized: Data = from_slice(&json).unwrap();
+        let deserialized: HexBinary = from_slice(&json).unwrap();
 
         assert_eq!(binary, deserialized);
     }
@@ -466,7 +466,7 @@ mod tests {
         let expected = vec![0u8, 187, 61, 11, 250, 0];
 
         let serialized = to_vec(&hex).unwrap();
-        let deserialized: Data = from_slice(&serialized).unwrap();
+        let deserialized: HexBinary = from_slice(&serialized).unwrap();
         assert_eq!(expected, deserialized.as_slice());
     }
 
@@ -474,47 +474,47 @@ mod tests {
     fn deserialize_from_invalid_string() {
         let invalid_str = "**BAD!**";
         let serialized = to_vec(&invalid_str).unwrap();
-        let res = from_slice::<Data>(&serialized);
+        let res = from_slice::<HexBinary>(&serialized);
         assert!(res.is_err());
     }
 
     #[test]
-    fn data_implements_debug() {
+    fn hex_binary_implements_debug() {
         // Some data
-        let data = Data(vec![0x07, 0x35, 0xAA, 0xcb, 0x00, 0xff]);
-        assert_eq!(format!("{:?}", data), "Data(0735aacb00ff)",);
+        let data = HexBinary(vec![0x07, 0x35, 0xAA, 0xcb, 0x00, 0xff]);
+        assert_eq!(format!("{:?}", data), "HexBinary(0735aacb00ff)",);
 
         // Empty
-        let data = Data(vec![]);
-        assert_eq!(format!("{:?}", data), "Data()",);
+        let data = HexBinary(vec![]);
+        assert_eq!(format!("{:?}", data), "HexBinary()",);
     }
 
     #[test]
-    fn data_implements_deref() {
+    fn hex_binary_implements_deref() {
         // Dereference to [u8]
-        let data = Data(vec![7u8, 35, 49, 101, 0, 255]);
+        let data = HexBinary(vec![7u8, 35, 49, 101, 0, 255]);
         assert_eq!(*data, [7u8, 35, 49, 101, 0, 255]);
 
         // This checks deref coercions from &Binary to &[u8] works
-        let data = Data(vec![7u8, 35, 49, 101, 0, 255]);
+        let data = HexBinary(vec![7u8, 35, 49, 101, 0, 255]);
         assert_eq!(data.len(), 6);
         let data_slice: &[u8] = &data;
         assert_eq!(data_slice, &[7u8, 35, 49, 101, 0, 255]);
     }
 
     #[test]
-    fn data_implements_hash() {
-        let a1 = Data::from([0, 187, 61, 11, 250, 0]);
+    fn hex_binary_implements_hash() {
+        let a1 = HexBinary::from([0, 187, 61, 11, 250, 0]);
         let mut hasher = DefaultHasher::new();
         a1.hash(&mut hasher);
         let a1_hash = hasher.finish();
 
-        let a2 = Data::from([0, 187, 61, 11, 250, 0]);
+        let a2 = HexBinary::from([0, 187, 61, 11, 250, 0]);
         let mut hasher = DefaultHasher::new();
         a2.hash(&mut hasher);
         let a2_hash = hasher.finish();
 
-        let b = Data::from([16, 21, 33, 0, 255, 9]);
+        let b = HexBinary::from([16, 21, 33, 0, 255, 9]);
         let mut hasher = DefaultHasher::new();
         b.hash(&mut hasher);
         let b_hash = hasher.finish();
@@ -525,10 +525,10 @@ mod tests {
 
     /// This requires Hash and Eq to be implemented
     #[test]
-    fn data_can_be_used_in_hash_set() {
-        let a1 = Data::from([0, 187, 61, 11, 250, 0]);
-        let a2 = Data::from([0, 187, 61, 11, 250, 0]);
-        let b = Data::from([16, 21, 33, 0, 255, 9]);
+    fn hex_binary_can_be_used_in_hash_set() {
+        let a1 = HexBinary::from([0, 187, 61, 11, 250, 0]);
+        let a2 = HexBinary::from([0, 187, 61, 11, 250, 0]);
+        let b = HexBinary::from([16, 21, 33, 0, 255, 9]);
 
         let mut set = HashSet::new();
         set.insert(a1.clone());
@@ -536,14 +536,14 @@ mod tests {
         set.insert(b.clone());
         assert_eq!(set.len(), 2);
 
-        let set1 = HashSet::<Data>::from_iter(vec![b.clone(), a1.clone()]);
+        let set1 = HashSet::<HexBinary>::from_iter(vec![b.clone(), a1.clone()]);
         let set2 = HashSet::from_iter(vec![a1, a2, b]);
         assert_eq!(set1, set2);
     }
 
     #[test]
-    fn data_implements_partial_eq_with_vector() {
-        let a = Data(vec![5u8; 3]);
+    fn hex_binary_implements_partial_eq_with_vector() {
+        let a = HexBinary(vec![5u8; 3]);
         let b = vec![5u8; 3];
         let c = vec![9u8; 3];
         assert_eq!(a, b);
@@ -553,8 +553,8 @@ mod tests {
     }
 
     #[test]
-    fn data_implements_partial_eq_with_slice_and_array() {
-        let a = Data(vec![0xAA, 0xBB]);
+    fn hex_binary_implements_partial_eq_with_slice_and_array() {
+        let a = HexBinary(vec![0xAA, 0xBB]);
 
         // Slice: &[u8]
         assert_eq!(a, b"\xAA\xBB" as &[u8]);

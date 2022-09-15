@@ -1,6 +1,6 @@
 use cosmwasm_schema::cw_serde;
 
-use crate::Data;
+use crate::HexBinary;
 
 #[cw_serde]
 pub enum ProxyExecuteMsg {
@@ -16,5 +16,5 @@ pub enum ProxyExecuteMsg {
 pub struct NoisCallbackMsg {
     /// The ID chosen by the caller in the `callback_id`
     pub id: String,
-    pub randomness: Data,
+    pub randomness: HexBinary,
 }
