@@ -1,11 +1,27 @@
 use cosmwasm_schema::cw_serde;
+use cosmwasm_std::Timestamp;
 
 use crate::HexBinary;
 
 #[cw_serde]
 pub enum ProxyExecuteMsg {
-    /// Get's the next randomness.
+    /// Gets the next randomness.
     GetNextRandomness {
+        // A job ID chosen by the caller
+        job_id: String,
+    },
+    /// Gets a randomness that is published after the provided timestamp.
+    ///
+    /// For example you can request a randomness in e.g. 25 hours for a game
+    /// round that runs for the upcoming 24 hours.
+    ///
+    /// Working with this message is only inteded for advanced use cases.
+    /// You need to ensure in the calling app that no action can be performed
+    /// anymore once `after` is reached. You need to consider that the BFT blocktime
+    /// can be behind and add an appriate safety margin.
+    GetRandomnessAfter {
+        /// The publish time of the randomness needs to be > `after`.
+        after: Timestamp,
         // A job ID chosen by the caller
         job_id: String,
     },
