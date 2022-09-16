@@ -92,6 +92,9 @@ pub fn execute_receive(
     _info: MessageInfo,
     callback: NoisCallback,
 ) -> Result<Response, ContractError> {
+    let proxy = NOIS_PROXY.load(deps.storage)?;
+    ensure_eq!(info.sender, proxy, ContractError::UnauthorizedReceive);
+
     let NoisCallback { job_id, randomness } = callback;
     let randomness: [u8; 32] = randomness
         .to_array()
