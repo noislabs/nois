@@ -41,9 +41,7 @@ pub fn execute_estimate_pi(
 
     let res = Response::new().add_message(WasmMsg::Execute {
         contract_addr: nois_proxy.into(),
-        msg: to_binary(&ProxyExecuteMsg::GetNextRandomness {
-            callback_id: Some(job_id),
-        })?,
+        msg: to_binary(&ProxyExecuteMsg::GetNextRandomness { job_id })?,
         funds: vec![],
     });
     Ok(res)
@@ -57,13 +55,15 @@ Create a `ExecuteMsg` enum case called `Receive`
 ```rust
 use cosmwasm_schema::{cw_serde, QueryResponses};
 
-use nois::NoisCallbackMsg;
+use nois::NoisCallback;
 
 #[cw_serde]
 pub enum ExecuteMsg {
     // ...
 
-    Receive(NoisCallbackMsg),
+    Receive {
+        callback: NoisCallback,
+    },
 }
 ```
 
@@ -80,10 +80,7 @@ pub fn execute(
     match msg {
         // ...
 
-        ExecuteMsg::Receive(NoisCallbackMsg {
-            id: callback_id,
-            randomness,
-        }) => execute_receive(deps, env, info, callback_id, randomness),
+        ExecuteMsg::Receive { callback } => execute_receive(deps, env, info, callback),
     }
 }
 
@@ -93,9 +90,12 @@ pub fn execute_receive(
     deps: DepsMut,
     _env: Env,
     _info: MessageInfo,
-    callback_id: String,
-    randomness: Data,
+    callback: NoisCallback,
 ) -> Result<Response, ContractError> {
+    let proxy = NOIS_PROXY.load(deps.storage)?;
+    ensure_eq!(info.sender, proxy, ContractError::UnauthorizedReceive);
+
+    let NoisCallback { job_id, randomness } = callback;
     let randomness: [u8; 32] = randomness
         .to_array()
         .map_err(|_| ContractError::InvalidRandomness)?;

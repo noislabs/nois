@@ -1,20 +1,42 @@
 use cosmwasm_schema::cw_serde;
-
-use crate::Data;
+use cosmwasm_std::{HexBinary, Timestamp};
 
 #[cw_serde]
 pub enum ProxyExecuteMsg {
-    /// Get's the next randomness.
+    /// Gets the next randomness.
     GetNextRandomness {
-        // A callback ID chosen by the caller
-        callback_id: Option<String>,
+        // A job ID chosen by the caller
+        job_id: String,
+    },
+    /// Gets a randomness that is published after the provided timestamp.
+    ///
+    /// For example you can request a randomness in e.g. 25 hours for a game
+    /// round that runs for the upcoming 24 hours.
+    ///
+    /// Working with this message is only inteded for advanced use cases.
+    /// You need to ensure in the calling app that no action can be performed
+    /// anymore once `after` is reached. You need to consider that the BFT blocktime
+    /// can be behind and add an appriate safety margin.
+    GetRandomnessAfter {
+        /// The publish time of the randomness needs to be > `after`.
+        after: Timestamp,
+        // A job ID chosen by the caller
+        job_id: String,
     },
 }
 
-/// This hould be de/serialized under `Receive()` variant in a ExecuteMsg
+/// This must be accepted in an `Receive { callback: NoisCallback }` enum case
+/// in the ExecuteMsg of the app.
 #[cw_serde]
-pub struct NoisCallbackMsg {
-    /// The ID chosen by the caller in the `callback_id`
-    pub id: String,
-    pub randomness: Data,
+pub struct NoisCallback {
+    /// The ID chosen by the caller for this job. Use this field to map responses to requests.
+    pub job_id: String,
+    pub randomness: HexBinary,
+}
+
+/// This is just a helper to properly serialize the above callback.
+/// The actual receiver should include this variant in the larger ExecuteMsg enum.
+#[cw_serde]
+pub enum ReceiverExecuteMsg {
+    Receive { callback: NoisCallback },
 }
