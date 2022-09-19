@@ -1,7 +1,5 @@
 use cosmwasm_schema::cw_serde;
-use cosmwasm_std::Timestamp;
-
-use crate::HexBinary;
+use cosmwasm_std::{HexBinary, Timestamp};
 
 #[cw_serde]
 pub enum ProxyExecuteMsg {
