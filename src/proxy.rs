@@ -1,11 +1,20 @@
 use cosmwasm_schema::cw_serde;
 use cosmwasm_std::{HexBinary, Timestamp};
 
+/// Max length that the job ID is allowed to have (in bytes)
+///
+/// The value is chosen to be enough for 32 byte hashes (such as sha256)
+/// in hex representation. But the choice of the job ID format is up to the
+/// dapp and can be anything that respects this length limit.
+pub const MAX_JOB_ID_LEN: usize = 64;
+
 #[cw_serde]
 pub enum ProxyExecuteMsg {
     /// Gets the next randomness.
     GetNextRandomness {
-        // A job ID chosen by the caller
+        /// A job ID chosen by the caller.
+        ///
+        /// Then length of this must not exceed [`MAX_JOB_ID_LEN`].
         job_id: String,
     },
     /// Gets a randomness that is published after the provided timestamp.
@@ -20,7 +29,9 @@ pub enum ProxyExecuteMsg {
     GetRandomnessAfter {
         /// The publish time of the randomness needs to be > `after`.
         after: Timestamp,
-        // A job ID chosen by the caller
+        /// A job ID chosen by the caller.
+        ///
+        /// Then length of this must not exceed [`MAX_JOB_ID_LEN`].
         job_id: String,
     },
 }
