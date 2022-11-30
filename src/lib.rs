@@ -1,11 +1,11 @@
 mod coinflip;
 mod decimal;
 mod integers;
+mod js_wrapper;
 mod prng;
 mod proxy;
 mod shuffle;
 mod sub_randomness;
-mod js_wrapper;
 
 pub use coinflip::{coinflip, Side};
 pub use decimal::random_decimal;
