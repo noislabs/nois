@@ -1,7 +1,5 @@
-use wasm_bindgen::prelude::*;
 /// The side of a coin. This is the result type of [`coinflip`]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[wasm_bindgen]
 pub enum Side {
     Heads = 0,
     Tails = 1,
