@@ -25,11 +25,8 @@ fn _cast_vec_to_array<T, const N: usize>(v: Vec<T>) -> [T; N] {
 pub fn _coinflip_js(randomness: &str) -> String {
     let hex_randomness = hex::decode(randomness).unwrap();
     let hex_randomness_array = _cast_vec_to_array(hex_randomness);
-    if coinflip(hex_randomness_array).is_heads() {
-        "heads".to_string()
-    } else {
-        "tails".to_string()
-    }
+    let side = coinflip(hex_randomness_array);
+    side.to_string()
 }
 
 #[wasm_bindgen]

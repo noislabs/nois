@@ -1,8 +1,20 @@
+use std::fmt;
+
 /// The side of a coin. This is the result type of [`coinflip`]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Side {
     Heads = 0,
     Tails = 1,
+}
+
+// Displays as "heads" or "tails"
+impl fmt::Display for Side {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Side::Heads => write!(f, "heads"),
+            Side::Tails => write!(f, "tails"),
+        }
+    }
 }
 
 impl Side {
@@ -38,6 +50,19 @@ mod tests {
 
         assert!(Side::Tails.is_tails());
         assert!(!Side::Tails.is_heads());
+    }
+
+    #[test]
+    fn side_implements_display() {
+        let heads = Side::Heads;
+        let embedded = format!("Side: {}", heads);
+        assert_eq!(embedded, "Side: heads");
+        assert_eq!(heads.to_string(), "heads");
+
+        let tails = Side::Tails;
+        let embedded = format!("Side: {}", tails);
+        assert_eq!(embedded, "Side: tails");
+        assert_eq!(tails.to_string(), "tails");
     }
 
     #[test]
