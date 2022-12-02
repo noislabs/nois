@@ -1,6 +1,8 @@
 mod coinflip;
 mod decimal;
 mod integers;
+#[cfg(feature = "js")]
+mod js_wrapper;
 mod prng;
 mod proxy;
 mod shuffle;
