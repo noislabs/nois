@@ -1,6 +1,6 @@
-use super::coinflip::coinflip;
-use super::int_in_range;
 use wasm_bindgen::prelude::*;
+
+use crate::{coinflip, int_in_range, roll_dice};
 
 //struct VerifyWebError(pub String);
 //
