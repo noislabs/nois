@@ -61,7 +61,7 @@ use nois::NoisCallback;
 pub enum ExecuteMsg {
     // ...
 
-    Receive {
+    NoisReceive {
         callback: NoisCallback,
     },
 }
@@ -80,13 +80,13 @@ pub fn execute(
     match msg {
         // ...
 
-        ExecuteMsg::Receive { callback } => execute_receive(deps, env, info, callback),
+        ExecuteMsg::NoisReceive { callback } => execute_nois_receive(deps, env, info, callback),
     }
 }
 
 // ...
 
-pub fn execute_receive(
+pub fn execute_nois_receive(
     deps: DepsMut,
     _env: Env,
     _info: MessageInfo,

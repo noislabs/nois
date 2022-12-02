@@ -36,7 +36,7 @@ pub enum ProxyExecuteMsg {
     },
 }
 
-/// This must be accepted in an `Receive { callback: NoisCallback }` enum case
+/// This must be accepted in an `NoisReceive { callback: NoisCallback }` enum case
 /// in the ExecuteMsg of the app.
 #[cw_serde]
 pub struct NoisCallback {
@@ -49,5 +49,29 @@ pub struct NoisCallback {
 /// The actual receiver should include this variant in the larger ExecuteMsg enum.
 #[cw_serde]
 pub enum ReceiverExecuteMsg {
-    Receive { callback: NoisCallback },
+    /// This is sent as `{"nois_receive": {"callback": {"job_id": "...", "randomness": "aabbddff.."}}}`
+    /// to the contract. We prefix the enum variant with `nois_` in order to avoid
+    /// a collision with other contracts (see https://github.com/noislabs/nois/issues/4).
+    NoisReceive { callback: NoisCallback },
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use cosmwasm_std::to_vec;
+
+    #[test]
+    fn receiver_execute_msg_serializes_nicely() {
+        let msg = ReceiverExecuteMsg::NoisReceive {
+            callback: NoisCallback {
+                job_id: "first".to_string(),
+                randomness: HexBinary::from_hex("aabbcc").unwrap(),
+            },
+        };
+        let ser = to_vec(&msg).unwrap();
+        assert_eq!(
+            ser,
+            br#"{"nois_receive":{"callback":{"job_id":"first","randomness":"aabbcc"}}}"#
+        );
+    }
 }
