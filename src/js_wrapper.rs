@@ -39,10 +39,13 @@ pub fn roll_dice_js(randomness: &str) -> u8 {
     roll_dice(hex_randomness_array)
 }
 
+/// Returns an integer between begin (inclusive) and end (exclusive).
+///
+/// Both bounds must be in the uint32 range.
 #[wasm_bindgen]
 #[allow(dead_code)] // exported via wasm_bindgen
-pub fn int_in_range_js(randomness: &str, int_begin: u8, int_end: u8) -> u8 {
+pub fn int_in_range_js(randomness: &str, begin: u32, end: u32) -> u32 {
     let hex_randomness = hex::decode(randomness).unwrap();
     let hex_randomness_array = cast_vec_to_array(hex_randomness);
-    int_in_range(hex_randomness_array, int_begin..int_end)
+    int_in_range(hex_randomness_array, begin..end)
 }
