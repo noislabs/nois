@@ -41,28 +41,30 @@ mod implementations {
         }
     }
 
-    fn cast_vec_to_array<T, const N: usize>(v: Vec<T>) -> [T; N] {
-        v.try_into().unwrap_or_else(|v: Vec<T>| {
-            panic!("Expected a Vec of length {} but it was {}", N, v.len())
+    fn cast_vec_to_array(data: Vec<u8>) -> Result<[u8; 32], JsError> {
+        let len = data.len();
+        data.try_into().map_err(|_e| {
+            let msg = format!("Expected a randomness of length 32 bytes (64 hex characters) but got {} ({} hex characters)", len, 2*len);
+            JsError(msg)
         })
     }
 
-    pub fn coinflip_impl(randomness: &str) -> Result<String, JsError> {
-        let hex_randomness = hex::decode(randomness)?;
-        let hex_randomness_array = cast_vec_to_array(hex_randomness);
-        let side = coinflip(hex_randomness_array);
+    pub fn coinflip_impl(randomness_hex: &str) -> Result<String, JsError> {
+        let randomness = hex::decode(randomness_hex)?;
+        let randomness_array = cast_vec_to_array(randomness)?;
+        let side = coinflip(randomness_array);
         Ok(side.to_string())
     }
 
-    pub fn roll_dice_impl(randomness: &str) -> Result<u8, JsError> {
-        let hex_randomness = hex::decode(randomness)?;
-        let hex_randomness_array = cast_vec_to_array(hex_randomness);
-        Ok(roll_dice(hex_randomness_array))
+    pub fn roll_dice_impl(randomness_hex: &str) -> Result<u8, JsError> {
+        let randomness = hex::decode(randomness_hex)?;
+        let randomness_array = cast_vec_to_array(randomness)?;
+        Ok(roll_dice(randomness_array))
     }
 
-    pub fn int_in_range_impl(randomness: &str, begin: u32, end: u32) -> Result<u32, JsError> {
-        let hex_randomness = hex::decode(randomness)?;
-        let hex_randomness_array = cast_vec_to_array(hex_randomness);
-        Ok(int_in_range(hex_randomness_array, begin..end))
+    pub fn int_in_range_impl(randomness_hex: &str, begin: u32, end: u32) -> Result<u32, JsError> {
+        let randomness = hex::decode(randomness_hex)?;
+        let randomness_array = cast_vec_to_array(randomness)?;
+        Ok(int_in_range(randomness_array, begin..end))
     }
 }
