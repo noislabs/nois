@@ -11,7 +11,7 @@ pub fn coinflip(randomness: &str) -> Result<String, JsValue> {
 // Returns a value from 1 to 6 (inclusive)
 #[wasm_bindgen]
 #[allow(dead_code)] // exported via wasm_bindgen
-pub fn roll_dice_js(randomness: &str) -> Result<u8, JsValue> {
+pub fn roll_dice(randomness: &str) -> Result<u8, JsValue> {
     Ok(implementations::roll_dice_impl(randomness)?)
 }
 
