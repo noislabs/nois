@@ -24,8 +24,29 @@ pub fn int_in_range(randomness: &str, begin: u32, end: u32) -> Result<u32, JsVal
     Ok(implementations::int_in_range_impl(randomness, begin, end)?)
 }
 
+/// Returns a Decimal d with 0 <= d < 1.
+/// The Decimal is in string representation and has 18 decimal digits.
+#[wasm_bindgen]
+#[allow(dead_code)] // exported via wasm_bindgen
+pub fn random_decimal(randomness: &str) -> Result<String, JsValue> {
+    Ok(implementations::random_decimal_impl(randomness)?.to_string())
+}
+
+/// Returns sub-randomness that is derives from the given randomness.
+#[wasm_bindgen]
+#[allow(dead_code)] // exported via wasm_bindgen
+pub fn sub_randomness(randomness: &str, count: u32) -> Result<Box<[JsValue]>, JsValue> {
+    let strings = implementations::sub_randomness_impl(randomness, count)?;
+    Ok(strings
+        .into_iter()
+        .map(|s| JsValue::from_str(&s))
+        .collect::<Vec<_>>()
+        .into_boxed_slice())
+}
+
 mod implementations {
-    use crate::{coinflip, int_in_range, roll_dice};
+    use crate::{coinflip, int_in_range, random_decimal, roll_dice, sub_randomness};
+    use cosmwasm_std::Decimal;
 
     pub struct JsError(String);
 
@@ -66,5 +87,22 @@ mod implementations {
         let randomness = hex::decode(randomness_hex)?;
         let randomness_array = cast_vec_to_array(randomness)?;
         Ok(int_in_range(randomness_array, begin..end))
+    }
+
+    pub fn random_decimal_impl(randomness_hex: &str) -> Result<Decimal, JsError> {
+        let randomness = hex::decode(randomness_hex)?;
+        let randomness_array = cast_vec_to_array(randomness)?;
+        Ok(random_decimal(randomness_array))
+    }
+
+    pub fn sub_randomness_impl(randomness_hex: &str, count: u32) -> Result<Vec<String>, JsError> {
+        let randomness = hex::decode(randomness_hex)?;
+        let randomness_array = cast_vec_to_array(randomness)?;
+        let count = count as usize;
+        let mut out = Vec::with_capacity(count);
+        for sub_randomness in sub_randomness(randomness_array).take(count) {
+            out.push(hex::encode(sub_randomness));
+        }
+        Ok(out)
     }
 }
