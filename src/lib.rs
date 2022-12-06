@@ -2,8 +2,7 @@ mod coinflip;
 mod decimal;
 mod dice;
 mod integers;
-#[cfg(feature = "js")]
-mod js_wrapper;
+mod js;
 mod prng;
 mod proxy;
 mod shuffle;
