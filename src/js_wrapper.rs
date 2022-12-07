@@ -2,20 +2,6 @@ use wasm_bindgen::prelude::*;
 
 use crate::{coinflip, int_in_range, roll_dice};
 
-//struct VerifyWebError(pub String);
-//
-//impl From<hex::FromHexError> for VerifyWebError {
-//    fn from(source: hex::FromHexError) -> Self {
-//        Self(source.to_string())
-//    }
-//}
-//
-//impl From<VerifyWebError> for JsValue {
-//    fn from(source: VerifyWebError) -> JsValue {
-//        JsValue::from_str(&source.0)
-//    }
-//}
-
 fn cast_vec_to_array<T, const N: usize>(v: Vec<T>) -> [T; N] {
     v.try_into()
         .unwrap_or_else(|v: Vec<T>| panic!("Expected a Vec of length {} but it was {}", N, v.len()))
