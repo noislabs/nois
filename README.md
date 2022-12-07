@@ -103,3 +103,86 @@ pub fn execute_nois_receive(
     // use randomness 🎉
 }
 ```
+
+## Build for JavaScript
+
+The Nois Toolbox can be compiled to JavaScript via WebAssembly. This way you can simulate
+the outputs for every randomness value. The results match exactly those of CosmWasm contracts
+using the same tools.
+
+In order to keep the JS/Wasm interface simple, there is a wrapper in the module `lib/js` which takes
+randomness inputs in hex format and uses types and error handling that plays well with JS.
+JS/Wasm bindings are created using wasm-bindgen.
+
+The JS does not match 100% the contract implementation. The differences are documented here.
+
+| Contract function        | JS function      | Status     | Note                                                                 |
+| ------------------------ | ---------------- | ---------- | -------------------------------------------------------------------- |
+| [`nois::coinflip`]       | `coinflip`       | ✅ Ready   | Returns string instead of enum                                       |
+| [`nois::roll_dice`]      | `roll_dice`      | ✅ Ready   |                                                                      |
+| [`nois::int_in_range`]   | `int_in_range`   | ✅ Ready   | Only supports half-oen range, i.e. the end value is always exluded   |
+| [`nois::ints_in_range`]  | `ints_in_range`  | 🚫 Missing |                                                                      |
+| [`nois::random_decimal`] | `random_decimal` | ✅ Ready   | Encodes result Decimal as string                                     |
+| [`nois::sub_randomness`] | `sub_randomness` | ✅ Ready   | Takes a `count` argument and returns an Array instead of an iterator |
+| [`nois::shuffle`]        |                  | 🚫 Missing |                                                                      |
+
+[`nois::coinflip`]: https://docs.rs/nois/latest/nois/fn.coinflip.html
+[`nois::roll_dice`]: https://docs.rs/nois/latest/nois/fn.roll_dice.html
+[`nois::int_in_range`]: https://docs.rs/nois/latest/nois/fn.int_in_range.html
+[`nois::ints_in_range`]: https://docs.rs/nois/latest/nois/fn.ints_in_range.html
+[`nois::random_decimal`]: https://docs.rs/nois/latest/nois/fn.random_decimal.html
+[`nois::sub_randomness`]: https://docs.rs/nois/latest/nois/fn.sub_randomness.html
+[`nois::shuffle`]: https://docs.rs/nois/latest/nois/fn.shuffle.html
+
+**Installation**
+
+We need this:
+
+```
+$ cargo install wasm-pack -f
+$ wasm-pack --version
+wasm-pack 0.10.3
+```
+
+**For Node.js**
+
+This creates a CommonJS module that is loaded synchonously.
+
+```
+$ wasm-pack build --target nodejs -- --features js
+$ node
+> const { coinflip, roll_dice, random_decimal, sub_randomness, int_in_range } = require('./pkg/nois');
+
+// Round 2497992
+
+> coinflip("c59f098f3c12b8c36ed81f5c17660c72414a1ed63467888a374af529a205c584")
+'tails'
+
+// Round 2497994
+
+> coinflip("2267ba7356c01a58e405d4194a31bddc3fd3eb1f0a86758f7a609ba8a47420ba")
+'heads'
+> roll_dice("2267ba7356c01a58e405d4194a31bddc3fd3eb1f0a86758f7a609ba8a47420ba")
+6
+> random_decimal("2267ba7356c01a58e405d4194a31bddc3fd3eb1f0a86758f7a609ba8a47420ba")
+'0.126047856387596389'
+> sub_randomness("2267ba7356c01a58e405d4194a31bddc3fd3eb1f0a86758f7a609ba8a47420ba", 3)
+[
+  'ac7b151d67cd4263520b16e450e6d1fc01750dab80b5d8b7cdc4075c99daf80a',
+  '33622b0865f1ab35142e3e63a91c25cf89311b04b9540ca15e49413a4a114ce1',
+  'f08927af18d4995c28f15f07e4038407f32d966087771314b9e64b6a33a9101c'
+]
+> int_in_range("2267ba7356c01a58e405d4194a31bddc3fd3eb1f0a86758f7a609ba8a47420ba", 5, 9)
+8
+```
+
+**For browsers and other JS environments**
+
+You need to change the target in order to get a suiteable package. E.g.
+
+```
+$ wasm-pack build --target web -- --features js
+$ ls ./pkg
+```
+
+for browsers. Please refer to the wasm-bindgen handbook [to learn more about targets](https://rustwasm.github.io/docs/wasm-bindgen/reference/deployment.html).

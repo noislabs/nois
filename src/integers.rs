@@ -17,7 +17,6 @@ use crate::prng::make_prng;
 /// use nois::int_in_range;
 ///
 /// # let randomness: [u8; 32] = [0x77; 32];
-///
 /// // Half-open interval [1, 7)
 /// let dice1 = int_in_range(randomness, 1..7);
 /// assert!(dice1 >= 1);
@@ -47,7 +46,6 @@ where
 /// use nois::ints_in_range;
 ///
 /// # let randomness: [u8; 32] = [0x77; 32];
-///
 /// let [dice1, dice2] = ints_in_range(randomness, 1..=6);
 /// assert!(dice1 >= 1 && dice1 <= 6);
 /// assert!(dice2 >= 1 && dice2 <= 6);
