@@ -10,7 +10,7 @@ workflows:
 jobs:
   package_nois:
     docker:
-      - image: rust:1.63.0
+      - image: rust:1.64.0
     working_directory: ~/project
     steps:
       - checkout:
@@ -23,7 +23,8 @@ jobs:
           command: rustup target add wasm32-unknown-unknown && rustup target list --installed
       - restore_cache:
           keys:
-            - cargocache-v2-nois:1.63.0-{{ checksum "~/project/Cargo.lock" }}
+            - cargocache-v2-nois:1.64.0-{{ checksum "~/project/Cargo.lock" }}
+            - cargocache-v2-nois:1.64.0-
       - run:
           name: Build library for native target (default features)
           command: cargo build --locked
@@ -43,11 +44,11 @@ jobs:
           paths:
             - /usr/local/cargo/registry
             - target
-          key: cargocache-v2-nois:1.63.0-{{ checksum "~/project/Cargo.lock" }}
+          key: cargocache-v2-nois:1.64.0-{{ checksum "~/project/Cargo.lock" }}
 
   lint:
     docker:
-      - image: rust:1.63.0
+      - image: rust:1.64.0
     steps:
       - checkout
       - run:
@@ -55,7 +56,8 @@ jobs:
           command: rustc --version; cargo --version; rustup --version; rustup target list --installed
       - restore_cache:
           keys:
-            - cargocache-v2-lint-rust:1.63.0-{{ checksum "Cargo.lock" }}
+            - cargocache-v2-lint-rust:1.64.0-{{ checksum "Cargo.lock" }}
+            - cargocache-v2-lint-rust:1.64.0-
       - run:
           name: Add rustfmt component
           command: rustup component add rustfmt
@@ -74,4 +76,4 @@ jobs:
             - target/debug/.fingerprint
             - target/debug/build
             - target/debug/deps
-          key: cargocache-v2-lint-rust:1.63.0-{{ checksum "Cargo.lock" }}
+          key: cargocache-v2-lint-rust:1.64.0-{{ checksum "Cargo.lock" }}
