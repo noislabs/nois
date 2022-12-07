@@ -35,13 +35,13 @@ impl Iterator for SubRandomnessProvider {
 /// use nois::{sub_randomness_with_key, int_in_range};
 ///
 ///
-///let mut provider = nois::sub_randomness_with_key(randomness);
+/// let mut provider = sub_randomness_with_key(randomness);
 ///
-///let dice1_subrandomness = provider.provide();
-///let dice2_subrandomness = provider.provide();
+/// let dice1_subrandomness = provider.provide();
+/// let dice2_subrandomness = provider.provide();
 ///
-///let dice1_result = int_in_range(dice1_subrandomness, 1..7);
-///let dice2_result = int_in_range(dice2_subrandomness, 1..7);
+/// let dice1_result = int_in_range(dice1_subrandomness, 1..7);
+/// let dice2_result = int_in_range(dice2_subrandomness, 1..7);
 /// ```
 pub fn sub_randomness_with_key(
     mut randomness: [u8; 32],
@@ -69,13 +69,13 @@ pub fn sub_randomness_with_key(
 /// use nois::{sub_randomness, int_in_range};
 ///
 ///
-///let mut provider = nois::sub_randomness(randomness);
+/// let mut provider = sub_randomness(randomness);
 ///
-///let dice1_subrandomness = provider.provide();
-///let dice2_subrandomness = provider.provide();
+/// let dice1_subrandomness = provider.provide();
+/// let dice2_subrandomness = provider.provide();
 ///
-///let dice1_result = int_in_range(dice1_subrandomness, 1..7);
-///let dice2_result = int_in_range(dice2_subrandomness, 1..7);
+/// let dice1_result = int_in_range(dice1_subrandomness, 1..7);
+/// let dice2_result = int_in_range(dice2_subrandomness, 1..7);
 /// ```
 pub fn sub_randomness(randomness: [u8; 32]) -> Box<SubRandomnessProvider> {
     sub_randomness_with_key(randomness, b"_^default^_")
