@@ -38,7 +38,7 @@ impl Side {
 /// use nois::coinflip;
 ///
 /// # let randomness: [u8; 32] = [0x77; 32];
-/// let side = nois::coinflip(randomness);
+/// let side = coinflip(randomness);
 /// if side.is_heads(){
 ///     println!("heads")
 /// }
