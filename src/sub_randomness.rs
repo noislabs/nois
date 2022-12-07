@@ -35,7 +35,7 @@ impl Iterator for SubRandomnessProvider {
 /// use nois::{sub_randomness_with_key, int_in_range};
 ///
 ///
-/// let mut provider = sub_randomness_with_key(randomness);
+/// let mut provider = sub_randomness_with_key(randomness, "Key");
 ///
 /// let dice1_subrandomness = provider.provide();
 /// let dice2_subrandomness = provider.provide();
