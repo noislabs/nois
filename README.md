@@ -121,6 +121,7 @@ The JS does not match 100% the contract implementation. The differences are docu
 | [`nois::coinflip`]       | `coinflip`       | ✅ Ready   | Returns string instead of enum                                       |
 | [`nois::roll_dice`]      | `roll_dice`      | ✅ Ready   |                                                                      |
 | [`nois::int_in_range`]   | `int_in_range`   | ✅ Ready   | Only supports half-oen range, i.e. the end value is always exluded   |
+| [`nois::ints_in_range`]  | `ints_in_range`  | 🚫 Missing |                                                                      |
 | [`nois::random_decimal`] | `random_decimal` | ✅ Ready   | Encodes result Decimal as string                                     |
 | [`nois::sub_randomness`] | `sub_randomness` | ✅ Ready   | Takes a `count` argument and returns an Array instead of an iterator |
 | [`nois::shuffle`]        |                  | 🚫 Missing |                                                                      |
@@ -128,6 +129,7 @@ The JS does not match 100% the contract implementation. The differences are docu
 [`nois::coinflip`]: https://docs.rs/nois/latest/nois/fn.coinflip.html
 [`nois::roll_dice`]: https://docs.rs/nois/latest/nois/fn.roll_dice.html
 [`nois::int_in_range`]: https://docs.rs/nois/latest/nois/fn.int_in_range.html
+[`nois::ints_in_range`]: https://docs.rs/nois/latest/nois/fn.ints_in_range.html
 [`nois::random_decimal`]: https://docs.rs/nois/latest/nois/fn.random_decimal.html
 [`nois::sub_randomness`]: https://docs.rs/nois/latest/nois/fn.sub_randomness.html
 [`nois::shuffle`]: https://docs.rs/nois/latest/nois/fn.shuffle.html
