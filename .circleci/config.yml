@@ -36,6 +36,9 @@ jobs:
       - run:
           name: Run unit tests
           command: cargo test --locked
+      - run:
+          name: Run unit tests (js feature enabled)
+          command: cargo test --locked --features js
       - save_cache:
           paths:
             - /usr/local/cargo/registry
