@@ -12,7 +12,7 @@ use crate::prng::make_prng;
 /// use nois::shuffle;
 ///
 /// // We are randomly shuffling a vector of integers [1,2,3,4]
-/// # let mut data = vec![1, 2, 3, 4];
+/// let mut data = vec![1, 2, 3, 4];
 /// shuffle(randomness, &mut data);
 /// // The length of the vector is the same but the order of the elements has changed
 /// assert_eq!(data.len(), 4);
