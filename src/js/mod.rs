@@ -93,18 +93,17 @@ mod implementations {
         begin: JsValue,
         end: JsValue,
     ) -> Result<JsValue, JsError> {
-        let Some(begin) = begin.as_f64() else {
-            return Err(JsError("begin is of type number".to_string()))
-        };
-        let Some(end) = end.as_f64() else {
-            return Err(JsError("end is of type number".to_string()))
-        };
-        let Some(begin) = to_safe_integer(begin) else {
-            return Err(JsError("begin is not a safe integer".to_string()))
-        };
-        let Some(end) = to_safe_integer(end) else {
-            return Err(JsError("end is not a safe integer".to_string()))
-        };
+        let begin = begin
+            .as_f64()
+            .ok_or_else(|| JsError("begin is not of type number".to_string()))?;
+        let end = end
+            .as_f64()
+            .ok_or_else(|| JsError("end is not of type number".to_string()))?;
+        let begin = to_safe_integer(begin)
+            .ok_or_else(|| JsError("begin is not a safe integer".to_string()))?;
+        let end =
+            to_safe_integer(end).ok_or_else(|| JsError("end is not a safe integer".to_string()))?;
+
         // Without this check we'd get a panic in Wasm (unreachable) when creating the range,
         // which is hard to debug.
         if end <= begin {
