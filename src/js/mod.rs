@@ -1,4 +1,7 @@
 #![cfg(feature = "js")]
+
+mod safe_integer;
+
 ///! This module contains a wrapper for this library for JavaScript.
 use wasm_bindgen::prelude::*;
 
@@ -17,10 +20,10 @@ pub fn roll_dice(randomness: &str) -> Result<u8, JsValue> {
 
 /// Returns an integer between begin (inclusive) and end (exclusive).
 ///
-/// Both bounds must be in the uint32 range.
+/// Both bounds must be numbers in the safe integer range.
 #[wasm_bindgen]
 #[allow(dead_code)] // exported via wasm_bindgen
-pub fn int_in_range(randomness: &str, begin: u32, end: u32) -> Result<u32, JsValue> {
+pub fn int_in_range(randomness: &str, begin: JsValue, end: JsValue) -> Result<JsValue, JsValue> {
     Ok(implementations::int_in_range_impl(randomness, begin, end)?)
 }
 
@@ -45,8 +48,10 @@ pub fn sub_randomness(randomness: &str, count: u32) -> Result<Box<[JsValue]>, Js
 }
 
 mod implementations {
+    use super::safe_integer::to_safe_integer;
     use crate::{coinflip, int_in_range, random_decimal, roll_dice, sub_randomness};
     use cosmwasm_std::Decimal;
+    use wasm_bindgen::JsValue;
 
     pub struct JsError(String);
 
@@ -83,10 +88,31 @@ mod implementations {
         Ok(roll_dice(randomness_array))
     }
 
-    pub fn int_in_range_impl(randomness_hex: &str, begin: u32, end: u32) -> Result<u32, JsError> {
+    pub fn int_in_range_impl(
+        randomness_hex: &str,
+        begin: JsValue,
+        end: JsValue,
+    ) -> Result<JsValue, JsError> {
+        let begin = begin
+            .as_f64()
+            .ok_or_else(|| JsError("begin is not of type number".to_string()))?;
+        let end = end
+            .as_f64()
+            .ok_or_else(|| JsError("end is not of type number".to_string()))?;
+        let begin = to_safe_integer(begin)
+            .ok_or_else(|| JsError("begin is not a safe integer".to_string()))?;
+        let end =
+            to_safe_integer(end).ok_or_else(|| JsError("end is not a safe integer".to_string()))?;
+
+        // Without this check we'd get a panic in Wasm (unreachable) when creating the range,
+        // which is hard to debug.
+        if end <= begin {
+            return Err(JsError("end must be larger than begin".to_string()));
+        }
         let randomness = hex::decode(randomness_hex)?;
         let randomness_array = cast_vec_to_array(randomness)?;
-        Ok(int_in_range(randomness_array, begin..end))
+        let out = int_in_range(randomness_array, begin..end);
+        Ok(JsValue::from_f64(out as f64))
     }
 
     pub fn random_decimal_impl(randomness_hex: &str) -> Result<Decimal, JsError> {

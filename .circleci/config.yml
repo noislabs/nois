@@ -24,6 +24,7 @@ jobs:
       - restore_cache:
           keys:
             - cargocache-v2-nois:1.63.0-{{ checksum "~/project/Cargo.lock" }}
+            - cargocache-v2-nois:1.63.0-
       - run:
           name: Build library for native target (default features)
           command: cargo build --locked
@@ -36,6 +37,9 @@ jobs:
       - run:
           name: Run unit tests
           command: cargo test --locked
+      - run:
+          name: Run unit tests (js feature enabled)
+          command: cargo test --locked --features js
       - save_cache:
           paths:
             - /usr/local/cargo/registry
@@ -53,6 +57,7 @@ jobs:
       - restore_cache:
           keys:
             - cargocache-v2-lint-rust:1.63.0-{{ checksum "Cargo.lock" }}
+            - cargocache-v2-lint-rust:1.63.0-
       - run:
           name: Add rustfmt component
           command: rustup component add rustfmt
