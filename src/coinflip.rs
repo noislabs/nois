@@ -35,12 +35,12 @@ impl Side {
 /// ## Example
 ///
 /// ```
-/// use nois::coinflip;
+/// use nois::{coinflip, Side};
 ///
-/// # let randomness: [u8; 32] = [0x77; 32];
+/// let randomness: [u8; 32] = [0x77; 32];
 /// let side = coinflip(randomness);
 /// println!("Result: {side}");
-/// match self {
+/// match side {
 ///     Side::Heads => {
 ///         // Player A starts the game
 ///     },

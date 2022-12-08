@@ -34,6 +34,8 @@ impl Iterator for SubRandomnessProvider {
 /// ```
 /// use nois::{sub_randomness_with_key, int_in_range};
 ///
+/// let randomness: [u8; 32]
+///     = hex::decode("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap().try_into().unwrap();
 ///
 /// let mut provider = sub_randomness_with_key(randomness, "Key");
 ///
@@ -67,6 +69,9 @@ pub fn sub_randomness_with_key(
 ///
 ///  ```
 /// use nois::{sub_randomness, int_in_range};
+///
+/// let randomness: [u8; 32]
+///     = hex::decode("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap().try_into().unwrap();
 ///
 /// let mut provider = sub_randomness(randomness);
 ///
