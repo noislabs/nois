@@ -3,6 +3,23 @@ use rand::Rng;
 use crate::prng::make_prng;
 
 /// Shuffles a vector using the Fisher-Yates algorithm
+///
+/// ## Example
+///
+/// Shuffle a vector of integers
+///
+/// ```
+/// use nois::shuffle;
+///
+/// let randomness: [u8; 32]
+///     = hex::decode("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap().try_into().unwrap();
+/// // We are randomly shuffling a vector of integers [1,2,3,4]
+/// let mut data = vec![1, 2, 3, 4];
+/// shuffle(randomness, &mut data);
+/// // The length of the vector is the same but the order of the elements has changed
+/// assert_eq!(data.len(), 4);
+/// assert_ne!(data, vec![1, 2, 3, 4]);
+/// ```
 pub fn shuffle<T>(randomness: [u8; 32], data: &mut Vec<T>) {
     let mut rng = make_prng(randomness);
     for i in (1..data.len()).rev() {

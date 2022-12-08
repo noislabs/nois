@@ -3,7 +3,7 @@
 [![nois on crates.io](https://img.shields.io/crates/v/nois.svg)](https://crates.io/crates/nois)
 [![nois on docs.rs](https://img.shields.io/docsrs/nois.svg)](https://docs.rs/nois)
 
-Use this library to integrate your app with the a nois proxy.
+Use this library to integrate your app with the nois proxy.
 
 ## Storing the proxy address
 
@@ -120,7 +120,7 @@ The JS does not match 100% the contract implementation. The differences are docu
 | ------------------------ | ---------------- | ---------- | -------------------------------------------------------------------- |
 | [`nois::coinflip`]       | `coinflip`       | ✅ Ready   | Returns string instead of enum                                       |
 | [`nois::roll_dice`]      | `roll_dice`      | ✅ Ready   |                                                                      |
-| [`nois::int_in_range`]   | `int_in_range`   | ✅ Ready   | Only supports half-oen range, i.e. the end value is always exluded   |
+| [`nois::int_in_range`]   | `int_in_range`   | ✅ Ready   | Only supports half-open range, i.e. the end value is always exluded  |
 | [`nois::ints_in_range`]  | `ints_in_range`  | 🚫 Missing |                                                                      |
 | [`nois::random_decimal`] | `random_decimal` | ✅ Ready   | Encodes result Decimal as string                                     |
 | [`nois::sub_randomness`] | `sub_randomness` | ✅ Ready   | Takes a `count` argument and returns an Array instead of an iterator |

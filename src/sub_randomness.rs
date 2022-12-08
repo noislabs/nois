@@ -26,6 +26,25 @@ impl Iterator for SubRandomnessProvider {
 /// Takes a randomness and a key. Returns an arbitrary number of sub-randomnesses.
 /// The key is mixed into the randomness such that calling this function with different keys
 /// leads to different outputs. Calling it with the same key and randomness leads to the same outputs.
+///
+/// # Example
+///
+/// Rolling two dice
+///
+/// ```
+/// use nois::{sub_randomness_with_key, int_in_range};
+///
+/// let randomness: [u8; 32]
+///     = hex::decode("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap().try_into().unwrap();
+///
+/// let mut provider = sub_randomness_with_key(randomness, "Key");
+///
+/// let dice1_subrandomness = provider.provide();
+/// let dice2_subrandomness = provider.provide();
+///
+/// let dice1_result = int_in_range(dice1_subrandomness, 1..7);
+/// let dice2_result = int_in_range(dice2_subrandomness, 1..7);
+/// ```
 pub fn sub_randomness_with_key(
     mut randomness: [u8; 32],
     key: impl AsRef<[u8]>,
@@ -43,6 +62,25 @@ pub fn sub_randomness_with_key(
 /// Takes a randomness and a key. Returns an arbitrary number of sub-randomnesses.
 ///
 /// This is equivalent to calling [`sub_randomness_with_key`] with key `b"_^default^_"`.
+///
+/// # Example
+///
+/// Rolling two dice
+///
+///  ```
+/// use nois::{sub_randomness, int_in_range};
+///
+/// let randomness: [u8; 32]
+///     = hex::decode("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap().try_into().unwrap();
+///
+/// let mut provider = sub_randomness(randomness);
+///
+/// let dice1_subrandomness = provider.provide();
+/// let dice2_subrandomness = provider.provide();
+///
+/// let dice1_result = int_in_range(dice1_subrandomness, 1..7);
+/// let dice2_result = int_in_range(dice2_subrandomness, 1..7);
+/// ```
 pub fn sub_randomness(randomness: [u8; 32]) -> Box<SubRandomnessProvider> {
     sub_randomness_with_key(randomness, b"_^default^_")
 }

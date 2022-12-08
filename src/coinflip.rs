@@ -30,7 +30,25 @@ impl Side {
     }
 }
 
-/// Takes a randomness and returns the result of a coinflip (heads or tails)
+/// Takes a randomness and returns the result of a coinflip (heads or tails).
+///
+/// ## Example
+///
+/// ```
+/// use nois::{coinflip, Side};
+///
+/// let randomness: [u8; 32] = [0x77; 32];
+/// let side = coinflip(randomness);
+/// println!("Result: {side}");
+/// match side {
+///     Side::Heads => {
+///         // Player A starts the game
+///     },
+///     Side::Tails => {
+///         // Player B starts the game
+///     },
+/// }
+/// ```
 pub fn coinflip(randomness: [u8; 32]) -> Side {
     if randomness[0] % 2 == 0 {
         Side::Heads
