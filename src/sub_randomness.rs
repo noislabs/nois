@@ -31,7 +31,7 @@ impl Iterator for SubRandomnessProvider {
 ///
 /// Rolling two dice
 ///
-///  ```
+/// ```
 /// use nois::{sub_randomness_with_key, int_in_range};
 ///
 ///
