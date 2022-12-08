@@ -39,11 +39,14 @@ impl Side {
 ///
 /// # let randomness: [u8; 32] = [0x77; 32];
 /// let side = coinflip(randomness);
-/// if side.is_heads(){
-///     println!("heads")
-/// }
-/// if side.is_tails(){
-///     println!("tails")
+/// println!("Result: {side}");
+/// match self {
+///     Side::Heads => {
+///         // Player A starts the game
+///     },
+///     Side::Tails => {
+///         // Player B starts the game
+///     },
 /// }
 /// ```
 pub fn coinflip(randomness: [u8; 32]) -> Side {
