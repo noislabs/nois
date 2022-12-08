@@ -68,7 +68,6 @@ pub fn sub_randomness_with_key(
 ///  ```
 /// use nois::{sub_randomness, int_in_range};
 ///
-///
 /// let mut provider = sub_randomness(randomness);
 ///
 /// let dice1_subrandomness = provider.provide();
