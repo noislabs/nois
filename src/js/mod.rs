@@ -159,7 +159,7 @@ mod implementations {
         }
         let randomness = randomness_from_str(randomness_hex)?;
         let count = count as usize; // usize is 32 bit (wasm32) or 64 bit (dev machines)
-        let out = ints_in_range(randomness, count, begin..=end)
+        let out = ints_in_range(randomness, count, begin, end)
             .into_iter()
             .map(|i| JsValue::from_f64(i as f64))
             .collect::<Vec<_>>()
