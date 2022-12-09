@@ -4,9 +4,9 @@ use crate::prng::make_prng;
 
 /// Shuffles a vector using the Fisher-Yates algorithm
 ///
-/// ## Example
+/// ## Examples
 ///
-/// Shuffle a vector of integers
+/// Shuffle a vector of integers:
 ///
 /// ```
 /// use nois::{randomness_from_str, shuffle};
@@ -18,7 +18,21 @@ use crate::prng::make_prng;
 /// shuffle(randomness, &mut data);
 /// // The length of the vector is the same but the order of the elements has changed
 /// assert_eq!(data.len(), 4);
-/// assert_ne!(data, vec![1, 2, 3, 4]);
+/// assert_eq!(data, vec![2, 4, 3, 1]);
+/// ```
+///
+/// Shuffle a vector of strings:
+///
+/// ```
+/// use nois::{randomness_from_str, shuffle};
+///
+/// let randomness = randomness_from_str("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap();
+///
+/// let mut data = vec!["bob".to_string(), "mary".to_string(), "su".to_string(), "marc".to_string()];
+/// shuffle(randomness, &mut data);
+/// // The length of the vector is the same but the order of the elements has changed
+/// assert_eq!(data.len(), 4);
+/// assert_eq!(data, vec!["mary".to_string(), "marc".to_string(), "su".to_string(), "bob".to_string()]);
 /// ```
 pub fn shuffle<T>(randomness: [u8; 32], data: &mut Vec<T>) {
     let mut rng = make_prng(randomness);
