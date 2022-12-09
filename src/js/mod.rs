@@ -49,14 +49,17 @@ pub fn sub_randomness(randomness: &str, count: u32) -> Result<Box<[JsValue]>, Js
 
 mod implementations {
     use super::safe_integer::to_safe_integer;
-    use crate::{coinflip, int_in_range, random_decimal, roll_dice, sub_randomness};
+    use crate::{
+        coinflip, int_in_range, random_decimal, randomness_from_str, roll_dice, sub_randomness,
+        RandomnessFromStrErr,
+    };
     use cosmwasm_std::Decimal;
     use wasm_bindgen::JsValue;
 
     pub struct JsError(String);
 
-    impl From<hex::FromHexError> for JsError {
-        fn from(source: hex::FromHexError) -> Self {
+    impl From<RandomnessFromStrErr> for JsError {
+        fn from(source: RandomnessFromStrErr) -> Self {
             Self(source.to_string())
         }
     }
@@ -67,25 +70,15 @@ mod implementations {
         }
     }
 
-    fn cast_vec_to_array(data: Vec<u8>) -> Result<[u8; 32], JsError> {
-        let len = data.len();
-        data.try_into().map_err(|_e| {
-            let msg = format!("Expected a randomness of length 32 bytes (64 hex characters) but got {} ({} hex characters)", len, 2*len);
-            JsError(msg)
-        })
-    }
-
     pub fn coinflip_impl(randomness_hex: &str) -> Result<String, JsError> {
-        let randomness = hex::decode(randomness_hex)?;
-        let randomness_array = cast_vec_to_array(randomness)?;
-        let side = coinflip(randomness_array);
+        let randomness = randomness_from_str(randomness_hex)?;
+        let side = coinflip(randomness);
         Ok(side.to_string())
     }
 
     pub fn roll_dice_impl(randomness_hex: &str) -> Result<u8, JsError> {
-        let randomness = hex::decode(randomness_hex)?;
-        let randomness_array = cast_vec_to_array(randomness)?;
-        Ok(roll_dice(randomness_array))
+        let randomness = randomness_from_str(randomness_hex)?;
+        Ok(roll_dice(randomness))
     }
 
     pub fn int_in_range_impl(
@@ -109,24 +102,21 @@ mod implementations {
         if end <= begin {
             return Err(JsError("end must be larger than begin".to_string()));
         }
-        let randomness = hex::decode(randomness_hex)?;
-        let randomness_array = cast_vec_to_array(randomness)?;
-        let out = int_in_range(randomness_array, begin..end);
+        let randomness = randomness_from_str(randomness_hex)?;
+        let out = int_in_range(randomness, begin..end);
         Ok(JsValue::from_f64(out as f64))
     }
 
     pub fn random_decimal_impl(randomness_hex: &str) -> Result<Decimal, JsError> {
-        let randomness = hex::decode(randomness_hex)?;
-        let randomness_array = cast_vec_to_array(randomness)?;
-        Ok(random_decimal(randomness_array))
+        let randomness = randomness_from_str(randomness_hex)?;
+        Ok(random_decimal(randomness))
     }
 
     pub fn sub_randomness_impl(randomness_hex: &str, count: u32) -> Result<Vec<String>, JsError> {
-        let randomness = hex::decode(randomness_hex)?;
-        let randomness_array = cast_vec_to_array(randomness)?;
+        let randomness = randomness_from_str(randomness_hex)?;
         let count = count as usize;
         let mut out = Vec::with_capacity(count);
-        for sub_randomness in sub_randomness(randomness_array).take(count) {
+        for sub_randomness in sub_randomness(randomness).take(count) {
             out.push(hex::encode(sub_randomness));
         }
         Ok(out)
