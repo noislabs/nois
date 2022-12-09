@@ -9,10 +9,10 @@ use crate::prng::make_prng;
 /// Shuffle a vector of integers
 ///
 /// ```
-/// use nois::shuffle;
+/// use nois::{randomness_from_str, shuffle};
 ///
-/// let randomness: [u8; 32]
-///     = hex::decode("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap().try_into().unwrap();
+/// let randomness = randomness_from_str("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap();
+///
 /// // We are randomly shuffling a vector of integers [1,2,3,4]
 /// let mut data = vec![1, 2, 3, 4];
 /// shuffle(randomness, &mut data);
