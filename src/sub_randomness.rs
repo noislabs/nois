@@ -27,7 +27,7 @@ impl Iterator for SubRandomnessProvider {
 /// The key is mixed into the randomness such that calling this function with different keys
 /// leads to different outputs. Calling it with the same key and randomness leads to the same outputs.
 ///
-/// # Example
+/// # Examples
 ///
 /// Rolling two dice
 ///
@@ -78,6 +78,36 @@ pub fn sub_randomness_with_key(
 ///
 /// let dice1_result = int_in_range(dice1_subrandomness, 1, 6);
 /// let dice2_result = int_in_range(dice2_subrandomness, 1, 6);
+/// ```
+///
+/// Roll 1200 dice using the iterator interface:
+///
+/// ```
+/// use std::collections::BTreeMap;
+/// use nois::{randomness_from_str, roll_dice, sub_randomness};
+///
+/// let randomness = randomness_from_str("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap();
+///
+/// let mut results = BTreeMap::<u8, usize>::new();
+/// for sub_randomness in sub_randomness(randomness).take(1200) {
+///     let number = roll_dice(sub_randomness);
+///     let current = results.get(&number).copied().unwrap_or_default();
+///     results.insert(number, current + 1);
+/// }
+/// let ones = results.get(&1).copied().unwrap_or_default();
+/// let twos = results.get(&2).copied().unwrap_or_default();
+/// let threes = results.get(&3).copied().unwrap_or_default();
+/// let fours = results.get(&4).copied().unwrap_or_default();
+/// let fives = results.get(&5).copied().unwrap_or_default();
+/// let sixes = results.get(&6).copied().unwrap_or_default();
+/// println!("{ones} {twos} {threes} {fours} {fives} {sixes}");
+/// assert!(ones > 160 && ones < 240);
+/// assert!(twos > 160 && twos < 240);
+/// assert!(threes > 160 && threes < 240);
+/// assert!(fours > 160 && fours < 240);
+/// assert!(fives > 160 && fives < 240);
+/// assert!(sixes > 160 && sixes < 240);
+/// assert_eq!(results.values().sum::<usize>(), 1200);
 /// ```
 pub fn sub_randomness(randomness: [u8; 32]) -> Box<SubRandomnessProvider> {
     sub_randomness_with_key(randomness, b"_^default^_")
