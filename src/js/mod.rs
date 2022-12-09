@@ -129,7 +129,7 @@ mod implementations {
             ));
         }
         let randomness = randomness_from_str(randomness_hex)?;
-        let out = int_in_range(randomness, begin..=end);
+        let out = int_in_range(randomness, begin, end);
         Ok(JsValue::from_f64(out as f64))
     }
 
