@@ -7,10 +7,9 @@ use crate::int_in_range;
 /// Single dice
 ///
 /// ```
-/// use nois::roll_dice;
+/// use nois::{randomness_from_str, roll_dice};
 ///
-/// let randomness: [u8; 32]
-///     = hex::decode("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap().try_into().unwrap();
+/// let randomness = randomness_from_str("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap();
 ///
 /// let number = roll_dice(randomness);
 /// assert_eq!(number, 2);
