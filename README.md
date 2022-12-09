@@ -124,7 +124,7 @@ The JS does not match 100% the contract implementation. The differences are docu
 | [`nois::ints_in_range`]  | `ints_in_range`  | 🚫 Missing |                                                                      |
 | [`nois::random_decimal`] | `random_decimal` | ✅ Ready   | Encodes result Decimal as string                                     |
 | [`nois::sub_randomness`] | `sub_randomness` | ✅ Ready   | Takes a `count` argument and returns an Array instead of an iterator |
-| [`nois::shuffle`]        |                  | 🚫 Missing |                                                                      |
+| [`nois::shuffle`]        | `shuffle`        | ✅ Ready   | Returns the shuffled array instead of shuffling in-place             |
 
 [`nois::coinflip`]: https://docs.rs/nois/latest/nois/fn.coinflip.html
 [`nois::roll_dice`]: https://docs.rs/nois/latest/nois/fn.roll_dice.html
@@ -151,7 +151,7 @@ This creates a CommonJS module that is loaded synchonously.
 ```
 $ wasm-pack build --target nodejs -- --features js
 $ node
-> const { coinflip, roll_dice, random_decimal, sub_randomness, int_in_range } = require('./pkg/nois');
+> const { coinflip, roll_dice, random_decimal, sub_randomness, int_in_range, shuffle } = require('./pkg/nois');
 
 // Round 2497992
 
@@ -174,6 +174,8 @@ $ node
 ]
 > int_in_range("2267ba7356c01a58e405d4194a31bddc3fd3eb1f0a86758f7a609ba8a47420ba", 5, 9)
 8
+> shuffle("2267ba7356c01a58e405d4194a31bddc3fd3eb1f0a86758f7a609ba8a47420ba", [1, 2, 3, "a", "b", true])
+[ 2, 'a', 1, 'b', 3, true ]
 ```
 
 **For browsers and other JS environments**

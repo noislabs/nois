@@ -47,11 +47,19 @@ pub fn sub_randomness(randomness: &str, count: u32) -> Result<Box<[JsValue]>, Js
         .into_boxed_slice())
 }
 
+// Takes a JavaScript array and returns a shuffled version of it. In contrast to the
+// Rust implementation this does not shuffle in-place.
+#[wasm_bindgen]
+#[allow(dead_code)] // exported via wasm_bindgen
+pub fn shuffle(randomness: &str, input: Box<[JsValue]>) -> Result<Box<[JsValue]>, JsValue> {
+    Ok(implementations::shuffle_impl(randomness, input)?)
+}
+
 mod implementations {
     use super::safe_integer::to_safe_integer;
     use crate::{
-        coinflip, int_in_range, random_decimal, randomness_from_str, roll_dice, sub_randomness,
-        RandomnessFromStrErr,
+        coinflip, int_in_range, random_decimal, randomness_from_str, roll_dice, shuffle,
+        sub_randomness, RandomnessFromStrErr,
     };
     use cosmwasm_std::Decimal;
     use wasm_bindgen::JsValue;
@@ -120,5 +128,15 @@ mod implementations {
             out.push(hex::encode(sub_randomness));
         }
         Ok(out)
+    }
+
+    pub fn shuffle_impl(
+        randomness_hex: &str,
+        input: Box<[JsValue]>,
+    ) -> Result<Box<[JsValue]>, JsError> {
+        let randomness = randomness_from_str(randomness_hex)?;
+        let mut a: Vec<JsValue> = input.into();
+        shuffle(randomness, &mut a);
+        Ok(a.into_boxed_slice())
     }
 }
