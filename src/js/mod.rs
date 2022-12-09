@@ -27,6 +27,22 @@ pub fn int_in_range(randomness: &str, begin: JsValue, end: JsValue) -> Result<Js
     Ok(implementations::int_in_range_impl(randomness, begin, end)?)
 }
 
+/// Returns multiple integers between begin (inclusive) and end (exclusive).
+///
+/// Both bounds must be numbers in the safe integer range.
+#[wasm_bindgen]
+#[allow(dead_code)] // exported via wasm_bindgen
+pub fn ints_in_range(
+    randomness: &str,
+    count: u32,
+    begin: JsValue,
+    end: JsValue,
+) -> Result<Box<[JsValue]>, JsValue> {
+    Ok(implementations::ints_in_range_impl(
+        randomness, count, begin, end,
+    )?)
+}
+
 /// Returns a Decimal d with 0 <= d < 1.
 /// The Decimal is in string representation and has 18 decimal digits.
 #[wasm_bindgen]
@@ -58,8 +74,8 @@ pub fn shuffle(randomness: &str, input: Box<[JsValue]>) -> Result<Box<[JsValue]>
 mod implementations {
     use super::safe_integer::to_safe_integer;
     use crate::{
-        coinflip, int_in_range, random_decimal, randomness_from_str, roll_dice, shuffle,
-        sub_randomness, RandomnessFromStrErr,
+        coinflip, int_in_range, ints_in_range, random_decimal, randomness_from_str, roll_dice,
+        shuffle, sub_randomness, RandomnessFromStrErr,
     };
     use cosmwasm_std::Decimal;
     use wasm_bindgen::JsValue;
@@ -113,6 +129,38 @@ mod implementations {
         let randomness = randomness_from_str(randomness_hex)?;
         let out = int_in_range(randomness, begin..end);
         Ok(JsValue::from_f64(out as f64))
+    }
+
+    pub fn ints_in_range_impl(
+        randomness_hex: &str,
+        count: u32,
+        begin: JsValue,
+        end: JsValue,
+    ) -> Result<Box<[JsValue]>, JsError> {
+        let begin = begin
+            .as_f64()
+            .ok_or_else(|| JsError("begin is not of type number".to_string()))?;
+        let end = end
+            .as_f64()
+            .ok_or_else(|| JsError("end is not of type number".to_string()))?;
+        let begin = to_safe_integer(begin)
+            .ok_or_else(|| JsError("begin is not a safe integer".to_string()))?;
+        let end =
+            to_safe_integer(end).ok_or_else(|| JsError("end is not a safe integer".to_string()))?;
+
+        // Without this check we'd get a panic in Wasm (unreachable) when creating the range,
+        // which is hard to debug.
+        if end <= begin {
+            return Err(JsError("end must be larger than begin".to_string()));
+        }
+        let randomness = randomness_from_str(randomness_hex)?;
+        let count = count as usize; // usize is 32 bit (wasm32) or 64 bit (dev machines)
+        let out = ints_in_range(randomness, count, begin..end)
+            .into_iter()
+            .map(|i| JsValue::from_f64(i as f64))
+            .collect::<Vec<_>>()
+            .into_boxed_slice();
+        Ok(out)
     }
 
     pub fn random_decimal_impl(randomness_hex: &str) -> Result<Decimal, JsError> {
