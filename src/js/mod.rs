@@ -18,7 +18,7 @@ pub fn roll_dice(randomness: &str) -> Result<u8, JsValue> {
     Ok(implementations::roll_dice_impl(randomness)?)
 }
 
-/// Returns an integer between begin (inclusive) and end (exclusive).
+/// Returns an integer between begin (inclusive) and end (inclusive).
 ///
 /// Both bounds must be numbers in the safe integer range.
 #[wasm_bindgen]
@@ -27,7 +27,7 @@ pub fn int_in_range(randomness: &str, begin: JsValue, end: JsValue) -> Result<Js
     Ok(implementations::int_in_range_impl(randomness, begin, end)?)
 }
 
-/// Returns multiple integers between begin (inclusive) and end (exclusive).
+/// Returns multiple integers between begin (inclusive) and end (inclusive).
 ///
 /// Both bounds must be numbers in the safe integer range.
 #[wasm_bindgen]
@@ -123,11 +123,13 @@ mod implementations {
 
         // Without this check we'd get a panic in Wasm (unreachable) when creating the range,
         // which is hard to debug.
-        if end <= begin {
-            return Err(JsError("end must be larger than begin".to_string()));
+        if end < begin {
+            return Err(JsError(
+                "end must be larger than or equal to begin".to_string(),
+            ));
         }
         let randomness = randomness_from_str(randomness_hex)?;
-        let out = int_in_range(randomness, begin..end);
+        let out = int_in_range(randomness, begin, end);
         Ok(JsValue::from_f64(out as f64))
     }
 
@@ -150,12 +152,14 @@ mod implementations {
 
         // Without this check we'd get a panic in Wasm (unreachable) when creating the range,
         // which is hard to debug.
-        if end <= begin {
-            return Err(JsError("end must be larger than begin".to_string()));
+        if end < begin {
+            return Err(JsError(
+                "end must be larger than or equal to begin".to_string(),
+            ));
         }
         let randomness = randomness_from_str(randomness_hex)?;
         let count = count as usize; // usize is 32 bit (wasm32) or 64 bit (dev machines)
-        let out = ints_in_range(randomness, count, begin..end)
+        let out = ints_in_range(randomness, count, begin, end)
             .into_iter()
             .map(|i| JsValue::from_f64(i as f64))
             .collect::<Vec<_>>()

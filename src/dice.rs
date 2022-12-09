@@ -31,7 +31,7 @@ use crate::int_in_range;
 /// assert_eq!(number2, 6);
 /// ```
 pub fn roll_dice(randomness: [u8; 32]) -> u8 {
-    int_in_range(randomness, 1..=6)
+    int_in_range(randomness, 1, 6)
 }
 
 #[cfg(test)]
