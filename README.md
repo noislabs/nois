@@ -120,8 +120,8 @@ The JS does not match 100% the contract implementation. The differences are docu
 | ------------------------ | ---------------- | -------- | -------------------------------------------------------------------- |
 | [`nois::coinflip`]       | `coinflip`       | ✅ Ready | Returns string instead of enum                                       |
 | [`nois::roll_dice`]      | `roll_dice`      | ✅ Ready |                                                                      |
-| [`nois::int_in_range`]   | `int_in_range`   | ✅ Ready | Only supports half-open range, i.e. the end value is always exluded  |
-| [`nois::ints_in_range`]  | `ints_in_range`  | ✅ Ready | Only supports half-open range, i.e. the end value is always exluded  |
+| [`nois::int_in_range`]   | `int_in_range`   | ✅ Ready | Only supports safe integer range                                     |
+| [`nois::ints_in_range`]  | `ints_in_range`  | ✅ Ready | Only supports safe integer range                                     |
 | [`nois::random_decimal`] | `random_decimal` | ✅ Ready | Encodes result Decimal as string                                     |
 | [`nois::sub_randomness`] | `sub_randomness` | ✅ Ready | Takes a `count` argument and returns an Array instead of an iterator |
 | [`nois::shuffle`]        | `shuffle`        | ✅ Ready | Returns the shuffled array instead of shuffling in-place             |
@@ -173,8 +173,8 @@ $ node
   'f08927af18d4995c28f15f07e4038407f32d966087771314b9e64b6a33a9101c'
 ]
 > int_in_range("2267ba7356c01a58e405d4194a31bddc3fd3eb1f0a86758f7a609ba8a47420ba", 5, 9)
-8
-> ints_in_range("2267ba7356c01a58e405d4194a31bddc3fd3eb1f0a86758f7a609ba8a47420ba", 20, 0, 2)
+9
+> ints_in_range("2267ba7356c01a58e405d4194a31bddc3fd3eb1f0a86758f7a609ba8a47420ba", 20, 0, 1)
 [
   1, 1, 1, 0, 0, 1, 1,
   0, 0, 1, 1, 1, 1, 1,
