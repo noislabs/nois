@@ -18,10 +18,10 @@ use crate::int_in_range;
 /// Double dice
 ///
 /// ```
-/// use nois::{roll_dice, sub_randomness};
+/// use nois::{sub_randomness, randomness_from_str, roll_dice};
 ///
-/// let randomness: [u8; 32]
-///     = hex::decode("e2ee31c20afbb20530f6a18d5d96fb20f766fe11799d3611b04bf9edbd2cffcb").unwrap().try_into().unwrap();
+/// let randomness = randomness_from_str("e2ee31c20afbb20530f6a18d5d96fb20f766fe11799d3611b04bf9edbd2cffcb").unwrap();
+///
 /// let mut provider = sub_randomness(randomness);
 ///
 /// let number1 = roll_dice(provider.provide());
