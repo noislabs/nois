@@ -394,7 +394,6 @@ dependencies = [
  "hex-literal",
  "rand",
  "rand_xoshiro",
- "schemars",
  "serde",
  "thiserror",
  "wasm-bindgen",
