@@ -124,7 +124,7 @@ The JS does not match 100% the contract implementation. The differences are docu
 | [`nois::ints_in_range`]  | `ints_in_range`  | ✅ Ready | Only supports safe integer range                                     |
 | [`nois::random_decimal`] | `random_decimal` | ✅ Ready | Encodes result Decimal as string                                     |
 | [`nois::sub_randomness`] | `sub_randomness` | ✅ Ready | Takes a `count` argument and returns an Array instead of an iterator |
-| [`nois::shuffle`]        | `shuffle`        | ✅ Ready | Returns the shuffled array instead of shuffling in-place             |
+| [`nois::shuffle`]        | `shuffle`        | ✅ Ready |                                                                      |
 
 [`nois::coinflip`]: https://docs.rs/nois/latest/nois/fn.coinflip.html
 [`nois::roll_dice`]: https://docs.rs/nois/latest/nois/fn.roll_dice.html

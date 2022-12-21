@@ -2,7 +2,10 @@ use rand::Rng;
 
 use crate::prng::make_prng;
 
-/// Shuffles a vector using the Fisher-Yates algorithm
+/// Shuffles a vector using the Fisher-Yates algorithm.
+///
+/// This consumes the vector of elements for efficientcy reasons. Applications that do
+/// not need the original data anymore benefit from an allocation-free in-place implementation.
 ///
 /// ## Examples
 ///
@@ -14,11 +17,11 @@ use crate::prng::make_prng;
 /// let randomness = randomness_from_str("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap();
 ///
 /// // We are randomly shuffling a vector of integers [1,2,3,4]
-/// let mut data = vec![1, 2, 3, 4];
-/// shuffle(randomness, &mut data);
+/// let data = vec![1, 2, 3, 4];
+/// let shuffled = shuffle(randomness, data);
 /// // The length of the vector is the same but the order of the elements has changed
-/// assert_eq!(data.len(), 4);
-/// assert_eq!(data, vec![2, 4, 3, 1]);
+/// assert_eq!(shuffled.len(), 4);
+/// assert_eq!(shuffled, vec![2, 4, 3, 1]);
 /// ```
 ///
 /// Shuffle a vector of strings:
@@ -28,18 +31,33 @@ use crate::prng::make_prng;
 ///
 /// let randomness = randomness_from_str("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap();
 ///
-/// let mut data = vec!["bob".to_string(), "mary".to_string(), "su".to_string(), "marc".to_string()];
-/// shuffle(randomness, &mut data);
+/// let data = vec!["bob".to_string(), "mary".to_string(), "su".to_string(), "marc".to_string()];
+/// let shuffled = shuffle(randomness, data);
 /// // The length of the vector is the same but the order of the elements has changed
-/// assert_eq!(data.len(), 4);
-/// assert_eq!(data, vec!["mary".to_string(), "marc".to_string(), "su".to_string(), "bob".to_string()]);
+/// assert_eq!(shuffled.len(), 4);
+/// assert_eq!(shuffled, vec!["mary".to_string(), "marc".to_string(), "su".to_string(), "bob".to_string()]);
 /// ```
-pub fn shuffle<T>(randomness: [u8; 32], data: &mut Vec<T>) {
+///
+/// Keep a copy of the original list
+///
+/// ```
+/// use nois::{randomness_from_str, shuffle};
+///
+/// let randomness = randomness_from_str("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap();
+///
+/// let original = vec!["bob".to_string(), "mary".to_string(), "su".to_string(), "marc".to_string()];
+/// let shuffled = shuffle(randomness, original.clone());
+/// // The length of the vector is the same but the order of the elements has changed
+/// assert_eq!(shuffled.len(), original.len());
+/// assert_ne!(shuffled, original);
+/// ```
+pub fn shuffle<T>(randomness: [u8; 32], mut data: Vec<T>) -> Vec<T> {
     let mut rng = make_prng(randomness);
     for i in (1..data.len()).rev() {
         let j = rng.gen_range(0..=i);
         data.swap(i, j);
     }
+    data
 }
 
 #[cfg(test)]
@@ -53,18 +71,18 @@ mod tests {
 
     #[test]
     fn shuffle_works() {
-        let mut data: Vec<i32> = vec![];
-        shuffle(RANDOMNESS1, &mut data);
-        assert_eq!(data, Vec::<i32>::new());
+        let data: Vec<i32> = vec![];
+        let shuffled = shuffle(RANDOMNESS1, data);
+        assert_eq!(shuffled, Vec::<i32>::new());
 
-        let mut data = vec![5];
-        shuffle(RANDOMNESS1, &mut data);
-        assert_eq!(data, vec![5]);
+        let data = vec![5];
+        let shuffled = shuffle(RANDOMNESS1, data);
+        assert_eq!(shuffled, vec![5]);
 
         // Order has changed for larger vector
-        let mut data = vec![1, 2, 3, 4];
-        shuffle(RANDOMNESS1, &mut data);
-        assert_eq!(data.len(), 4);
-        assert_ne!(data, vec![1, 2, 3, 4]);
+        let data = vec![1, 2, 3, 4];
+        let shuffled = shuffle(RANDOMNESS1, data);
+        assert_eq!(shuffled.len(), 4);
+        assert_ne!(shuffled, vec![1, 2, 3, 4]);
     }
 }
