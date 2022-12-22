@@ -6,6 +6,9 @@ workflows:
     jobs:
       - package_nois
       - lint
+
+  deploy:
+    jobs:
       - build_wasm:
           requires:
             - package_nois
