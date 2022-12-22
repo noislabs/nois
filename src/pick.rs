@@ -102,6 +102,7 @@ mod tests {
 
         const TEST_SAMPLE_SIZE: usize = 300_000;
         const N_PICKED_ELEMENTS: usize = 3;
+        const ACCURACY: f32 = 0.01;
 
         let data = vec![1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -124,8 +125,10 @@ mod tests {
         }
         let estimated_count_for_uniform_distribution =
             (TEST_SAMPLE_SIZE * N_PICKED_ELEMENTS / data.len()) as f32;
-        let estimation_min: i32 = (estimated_count_for_uniform_distribution * 0.99) as i32;
-        let estimation_max: i32 = (estimated_count_for_uniform_distribution * 1.01) as i32;
+        let estimation_min: i32 =
+            (estimated_count_for_uniform_distribution * (1_f32 - ACCURACY)) as i32;
+        let estimation_max: i32 =
+            (estimated_count_for_uniform_distribution * (1_f32 + ACCURACY)) as i32;
         println!(
             "estimation {}, max: {}, min: {}",
             estimated_count_for_uniform_distribution, estimation_max, estimation_min

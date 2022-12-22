@@ -85,4 +85,58 @@ mod tests {
         assert_eq!(shuffled.len(), 4);
         assert_ne!(shuffled, vec![1, 2, 3, 4]);
     }
+
+    #[test]
+    fn shuffle_distribution_is_uniform() {
+        /// This test takes a vector of characters as data
+        /// Then it will generate many shuffled combinations out of it with sub_randomness
+        /// Then for each common index of these sampled vectors it will make a histogram of what characters were selectd for that index.
+        /// The result will be 10 histograms and every histogram will show how many "a" how many "b" ... "k"
+        /// Example we have 3 samples:
+        /// 1- vec!["a", "b", "c", "d", "e", "f", "h", "i", "j", "k"]
+        /// 2- vec!["e", "f", "h", "i", "j", "k", "a", "b", "c", "d",]
+        /// 3- vec!["a", "c", "b", "d", "e", "f", "h", "i", "j", "k"]
+        /// The first histogram will have "a" -> 2, "e"-> 1, and the rest 0
+        /// Then we make 10 assertions per histogram on whether that character was represented as expected within that index with 5% accuracy
+        /// We do this for all the 10 histograms, so 100 assertions in total.
+        /// This test pretty much tests Fisher Yates algorithm and our implementation of it
+        use crate::sub_randomness::sub_randomness;
+        use std::collections::HashMap;
+
+        const TEST_SAMPLE_SIZE: usize = 100_000;
+        const ACCURACY: f32 = 0.05;
+
+        let data = vec!["a", "b", "c", "d", "e", "f", "h", "i", "j", "k"];
+
+        let mut provider = sub_randomness(RANDOMNESS1);
+        let mut result = vec![];
+
+        for _i in 0..TEST_SAMPLE_SIZE {
+            let subrand_i = provider.provide();
+            let result_i = shuffle(subrand_i, data.clone());
+            result.push(result_i);
+        }
+        //let acc_max = 1 as f32 * ACCURACY;
+        let estimation_min = (TEST_SAMPLE_SIZE / data.len()) as f32 * (1_f32 - ACCURACY);
+        let estimation_max = (TEST_SAMPLE_SIZE / data.len()) as f32 * (1_f32 + ACCURACY);
+        println!(
+            "estimation min: {} estimation max: {}  ",
+            estimation_min, estimation_max
+        );
+
+        for i in 0..data.len() {
+            let mut histogram = HashMap::new();
+
+            for vec in &result {
+                let element = vec.get(i).unwrap();
+                let count = histogram.entry(element).or_insert(0);
+                *count += 1;
+            }
+
+            for (bin, count) in histogram {
+                println!("Histogram index: {} - {}: {}", i, bin, count);
+                assert!(count >= estimation_min as i32 && count <= estimation_max as i32);
+            }
+        }
+    }
 }
