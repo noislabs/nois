@@ -85,7 +85,7 @@ jobs:
             - target/debug/deps
           key: cargocache-v2-lint-rust:1.63.0-{{ checksum "Cargo.lock" }}
 
-  build-wasm:
+  build_wasm:
     docker:
         - image: rust:1.63.0
     working_directory: ~/project
