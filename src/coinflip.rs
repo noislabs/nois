@@ -125,12 +125,10 @@ mod tests {
         const TEST_SAMPLE_SIZE: usize = 300_000;
         const ACCURACY: f32 = 0.01;
 
-        let mut provider = sub_randomness(RANDOMNESS1);
         let mut result = vec![];
 
         for subrand in sub_randomness(RANDOMNESS1).take(TEST_SAMPLE_SIZE) {
-            let result = coinflip(subrand);
-            result.push(result_i.is_heads());
+            result.push(coinflip(subrand).is_heads());
         }
 
         let mut histogram = HashMap::new();
