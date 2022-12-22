@@ -63,19 +63,25 @@ pub fn sub_randomness(randomness: &str, count: u32) -> Result<Box<[JsValue]>, Js
         .into_boxed_slice())
 }
 
-// Takes a JavaScript array and returns a shuffled version of it. In contrast to the
-// Rust implementation this does not shuffle in-place.
+// Takes a JavaScript array and returns a shuffled version of it.
 #[wasm_bindgen]
 #[allow(dead_code)] // exported via wasm_bindgen
 pub fn shuffle(randomness: &str, input: Box<[JsValue]>) -> Result<Box<[JsValue]>, JsValue> {
     Ok(implementations::shuffle_impl(randomness, input)?)
 }
 
+// Picks `n` elements from a JavaScript array and returns them.
+#[wasm_bindgen]
+#[allow(dead_code)] // exported via wasm_bindgen
+pub fn pick(randomness: &str, n: u32, input: Box<[JsValue]>) -> Result<Box<[JsValue]>, JsValue> {
+    Ok(implementations::pick_impl(randomness, n, input)?)
+}
+
 mod implementations {
     use super::safe_integer::to_safe_integer;
     use crate::{
-        coinflip, int_in_range, ints_in_range, random_decimal, randomness_from_str, roll_dice,
-        shuffle, sub_randomness, RandomnessFromStrErr,
+        coinflip, int_in_range, ints_in_range, pick, random_decimal, randomness_from_str,
+        roll_dice, shuffle, sub_randomness, RandomnessFromStrErr,
     };
     use cosmwasm_std::Decimal;
     use wasm_bindgen::JsValue;
@@ -187,8 +193,19 @@ mod implementations {
         input: Box<[JsValue]>,
     ) -> Result<Box<[JsValue]>, JsError> {
         let randomness = randomness_from_str(randomness_hex)?;
-        let mut a: Vec<JsValue> = input.into();
-        shuffle(randomness, &mut a);
-        Ok(a.into_boxed_slice())
+        let a: Vec<JsValue> = input.into();
+        let shuffled = shuffle(randomness, a);
+        Ok(shuffled.into_boxed_slice())
+    }
+
+    pub fn pick_impl(
+        randomness_hex: &str,
+        n: u32,
+        input: Box<[JsValue]>,
+    ) -> Result<Box<[JsValue]>, JsError> {
+        let randomness = randomness_from_str(randomness_hex)?;
+        let a: Vec<JsValue> = input.into();
+        let picked = pick(randomness, n as usize, a);
+        Ok(picked.into_boxed_slice())
     }
 }
