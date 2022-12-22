@@ -128,9 +128,8 @@ mod tests {
         let mut provider = sub_randomness(RANDOMNESS1);
         let mut result = vec![];
 
-        for _i in 0..TEST_SAMPLE_SIZE {
-            let subrand_i = provider.provide();
-            let result_i = coinflip(subrand_i);
+        for subrand in sub_randomness(RANDOMNESS1).take(TEST_SAMPLE_SIZE) {
+            let result = coinflip(subrand);
             result.push(result_i.is_heads());
         }
 
