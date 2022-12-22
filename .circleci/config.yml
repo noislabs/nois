@@ -85,9 +85,12 @@ jobs:
   publish:
     docker:
         - image: rust:1.63.0
+    working_directory: ~/project
     #if: github.event_name == 'tag' #will uncommoent after test
     steps:
       - run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      - checkout:
+          path: ~/project
       - run:
           name: Run build wasm
           command: wasm-pack build --target web -- --features js
