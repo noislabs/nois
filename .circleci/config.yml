@@ -96,19 +96,20 @@ jobs:
       - checkout:
           path: ~/project
       - run: wasm-pack build --target web -- --features js
-
-      - store_artifacts:
-          path: pkg/
-          destination: pkg/
+      - persist_to_workspace:
+          root: workspace
+          paths:
+            - pkg/
   publish_npm:
     docker:
         - image: node:18.12.1-slim
 
     steps:
       - attach_workspace:
-          at: pkg/
+          # Must be absolute path or relative path from working_directory
+          at: /pkg
       - run:
           name: publish npm
-          command: npm publish --auth-token=$NPM_TOKEN
+          command: cd pkg && npm publish --auth-token=$NPM_TOKEN
           environment:
                 NPM_TOKEN: ${NPM_TOKEN}
