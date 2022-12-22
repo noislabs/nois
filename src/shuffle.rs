@@ -108,13 +108,10 @@ mod tests {
 
         let data = vec!["a", "b", "c", "d", "e", "f", "h", "i", "j", "k"];
 
-        let mut provider = sub_randomness(RANDOMNESS1);
         let mut result = vec![];
 
-        for _i in 0..TEST_SAMPLE_SIZE {
-            let subrand_i = provider.provide();
-            let result_i = shuffle(subrand_i, data.clone());
-            result.push(result_i);
+        for subrand in sub_randomness(RANDOMNESS1).take(TEST_SAMPLE_SIZE) {
+            result.push(shuffle(subrand, data.clone()));
         }
         //let acc_max = 1 as f32 * ACCURACY;
         let estimation_min = (TEST_SAMPLE_SIZE / data.len()) as f32 * (1_f32 - ACCURACY);

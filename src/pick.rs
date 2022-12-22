@@ -106,13 +106,10 @@ mod tests {
 
         let data = vec![1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-        let mut provider = sub_randomness(RANDOMNESS1);
         let mut result = vec![vec![]];
 
-        for _i in 0..TEST_SAMPLE_SIZE {
-            let subrand_i = provider.provide();
-            let picked = pick(subrand_i, N_PICKED_ELEMENTS, data.clone());
-            result.push(picked);
+        for subrand in sub_randomness(RANDOMNESS1).take(TEST_SAMPLE_SIZE) {
+            result.push(pick(subrand, N_PICKED_ELEMENTS, data.clone()));
         }
 
         let mut histogram = HashMap::new();
