@@ -6,6 +6,10 @@ workflows:
     jobs:
       - package_nois
       - lint
+      - publish:
+          requires:
+            - package_nois
+            - lint
 
 jobs:
   package_nois:
@@ -77,3 +81,13 @@ jobs:
             - target/debug/build
             - target/debug/deps
           key: cargocache-v2-lint-rust:1.63.0-{{ checksum "Cargo.lock" }}
+
+  publish:
+    docker:
+        - image: rust:1.63.0
+    #if: github.event_name == 'tag' #will uncommoent after test
+    steps:
+      - run: wasm-pack build --target web -- --features js
+      - set-env:
+          NPM_TOKEN: ${NPM_TOKEN}
+      - run: cd pkg && npm publish --auth-token=$NPM_TOKEN
