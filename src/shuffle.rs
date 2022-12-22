@@ -88,12 +88,18 @@ mod tests {
 
     #[test]
     fn shuffle_distribution_is_uniform() {
-        /// This test takes a listof characters
-        /// Then it will generate many shuffled combinations our of it with subrand
-        /// Then for each index of these sampled lists it will make a histogram of what characters were selectd for that index
+        /// This test takes a vector of characters as data
+        /// Then it will generate many shuffled combinations out of it with sub_randomness
+        /// Then for each common index of these sampled vectors it will make a histogram of what characters were selectd for that index.
         /// The result will be 10 histograms and every histogram will show how many "a" how many "b" ... "k"
-        /// Then we make 10 assertions per histogram so 100 assertions on whether that character was represented as expected within that index with 5% accuracy
-        /// This test pretty much tests our Fisher Yates and our implementation of it
+        /// Example we have 3 samples:
+        /// 1- vec!["a", "b", "c", "d", "e", "f", "h", "i", "j", "k"]
+        /// 2- vec!["e", "f", "h", "i", "j", "k", "a", "b", "c", "d",]
+        /// 3- vec!["a", "c", "b", "d", "e", "f", "h", "i", "j", "k"]
+        /// The first histogram will have "a" -> 2, "e"-> 1, and the rest 0
+        /// Then we make 10 assertions per histogram on whether that character was represented as expected within that index with 5% accuracy
+        /// We do this for all the 10 histograms, so 100 assertions in total.
+        /// This test pretty much tests Fisher Yates algorithm and our implementation of it
         use crate::sub_randomness::sub_randomness;
         use std::collections::HashMap;
 
