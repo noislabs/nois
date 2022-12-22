@@ -85,4 +85,51 @@ mod tests {
         assert_eq!(shuffled.len(), 4);
         assert_ne!(shuffled, vec![1, 2, 3, 4]);
     }
+
+    #[test]
+    fn shuffle_distribution_is_uniform() {
+        /// This test takes a listof characters
+        /// Then it will generate many shuffled combinations our of it with subrand
+        /// Then for each index of these sampled lists it will make a histogram of what characters were selectd for that index
+        /// The result will be 10 histograms and every histogram will show how many "a" how many "b" ... "k"
+        /// Then we make 10 assertions per histogram so 100 assertions on whether that character was represented as expected within that index with 5
+        use crate::sub_randomness::sub_randomness;
+        use std::collections::HashMap;
+
+        const TEST_SAMPLE_SIZE: usize = 100_000;
+        const ACCURACY: f32 = 0.05;
+
+        let data = vec!["a", "b", "c", "d", "e", "f", "h", "i", "j", "k"];
+
+        let mut provider = sub_randomness(RANDOMNESS1);
+        let mut result = vec![];
+
+        for _i in 0..TEST_SAMPLE_SIZE {
+            let subrand_i = provider.provide();
+            let result_i = shuffle(subrand_i, data.clone());
+            result.push(result_i);
+        }
+        //let acc_max = 1 as f32 * ACCURACY;
+        let estimation_min = (TEST_SAMPLE_SIZE / data.len()) as f32 * (1_f32 - ACCURACY);
+        let estimation_max = (TEST_SAMPLE_SIZE / data.len()) as f32 * (1_f32 + ACCURACY);
+        println!(
+            "estimation min: {} estimation max: {}  ",
+            estimation_min, estimation_max
+        );
+
+        for i in 0..data.len() {
+            let mut histogram = HashMap::new();
+
+            for vec in &result {
+                let element = vec.get(i).unwrap();
+                let count = histogram.entry(element).or_insert(0);
+                *count += 1;
+            }
+
+            for (bin, count) in histogram {
+                println!("Histogram index: {} - {}: {}", i, bin, count);
+                assert!(count >= estimation_min as i32 && count <= estimation_max as i32);
+            }
+        }
+    }
 }
