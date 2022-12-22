@@ -10,9 +10,6 @@ workflows:
   deploy:
     jobs:
       - build_wasm:
-          requires:
-            - package_nois
-            - lint
       - publish_npm:
           requires:
             - build_wasm
@@ -106,6 +103,7 @@ jobs:
   publish_npm:
     docker:
         - image: node:18.12.1-slim
+
     steps:
       - attach_workspace:
           at: pkg/
