@@ -27,7 +27,7 @@ use crate::prng::make_prng;
 /// let picked = pick(randomness, 6, data);
 /// // The length of the vector is the same but the order of the elements has changed
 /// assert_eq!(picked.len(), 6);
-/// assert_eq!(picked, vec![44, 33, 18, 22, 8, 10]);
+/// assert_eq!(picked, vec![7, 33, 18, 22, 8, 10]);
 /// ```
 ///
 /// Pick two winners from a vector of strings:
@@ -48,7 +48,7 @@ pub fn pick<T>(randomness: [u8; 32], n: usize, mut data: Vec<T>) -> Vec<T> {
         panic!("attempt to pick more elements than the input length");
     }
     let mut rng = make_prng(randomness);
-    for i in ((data.len() - n + 1)..data.len()).rev() {
+    for i in ((data.len() - n)..data.len()).rev() {
         let j = rng.gen_range(0..=i);
         data.swap(i, j);
     }
@@ -89,6 +89,52 @@ mod tests {
     fn pick_panicks_for_n_greater_than_len() {
         let data = vec![1, 2, 3, 4];
         let _picked = pick(RANDOMNESS1, 5, data);
+    }
+
+    #[test]
+    fn pick_distribution_is_uniform() {
+        /// This test will generate a huge amount  of subrandomness and picks n elements from the list
+        /// It will then test that the outcome of every possibility within the picked value falls with 1% close
+        /// To what it should be in a uniform distribution
+        /// For this test to work properly for a 10 element size data consider choosing a TEST_SAMPLE_SIZE higher than 100_000
+        use crate::sub_randomness::sub_randomness;
+        use std::collections::HashMap;
+
+        const TEST_SAMPLE_SIZE: usize = 300_000;
+        const N_PICKED_ELEMENTS: usize = 3;
+        const ACCURACY: f32 = 0.01;
+
+        let data = vec![1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+        let mut result = vec![vec![]];
+
+        for subrand in sub_randomness(RANDOMNESS1).take(TEST_SAMPLE_SIZE) {
+            result.push(pick(subrand, N_PICKED_ELEMENTS, data.clone()));
+        }
+
+        let mut histogram = HashMap::new();
+
+        for row in result {
+            for element in row {
+                let count = histogram.entry(element).or_insert(0);
+                *count += 1;
+            }
+        }
+        let estimated_count_for_uniform_distribution =
+            (TEST_SAMPLE_SIZE * N_PICKED_ELEMENTS / data.len()) as f32;
+        let estimation_min: i32 =
+            (estimated_count_for_uniform_distribution * (1_f32 - ACCURACY)) as i32;
+        let estimation_max: i32 =
+            (estimated_count_for_uniform_distribution * (1_f32 + ACCURACY)) as i32;
+        println!(
+            "estimation {}, max: {}, min: {}",
+            estimated_count_for_uniform_distribution, estimation_max, estimation_min
+        );
+        // This will assert on all the elements of the data 1 by 1 and check if their occurence is within the 1% expected range
+        for (bin, count) in histogram {
+            println!("{}: {}", bin, count);
+            assert!(count >= estimation_min && count <= estimation_max);
+        }
     }
 
     #[test]
