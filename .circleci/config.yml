@@ -87,10 +87,9 @@ jobs:
         - image: rust:1.63.0
     #if: github.event_name == 'tag' #will uncommoent after test
     steps:
-      - run: cargo install wasm-bindgen-cli
       - run:
           name: Run build wasm
-          command: $HOME/.cargo/bin/wasm-pack build --target web -- --features js
+          command: cargo install wasm-bindgen-cli && $HOME/.cargo/bin/wasm-pack build --target web -- --features js
           environment:
             NPM_TOKEN: ${NPM_TOKEN}
       - run: cd pkg && npm publish --auth-token=$NPM_TOKEN
