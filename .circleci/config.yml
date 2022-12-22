@@ -87,7 +87,9 @@ jobs:
         - image: rust:1.63.0
     #if: github.event_name == 'tag' #will uncommoent after test
     steps:
-      - run: wasm-pack build --target web -- --features js
-      - set-env:
-          NPM_TOKEN: ${NPM_TOKEN}
+      - run:
+          name: Run build wasm
+          command: wasm-pack build --target web -- --features js
+          environment:
+            NPM_TOKEN: ${NPM_TOKEN}
       - run: cd pkg && npm publish --auth-token=$NPM_TOKEN
