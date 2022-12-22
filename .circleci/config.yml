@@ -6,10 +6,13 @@ workflows:
     jobs:
       - package_nois
       - lint
-      - publish:
+      - build_wasm:
           requires:
             - package_nois
             - lint
+      - publish_npm:
+          requires:
+            - build_wasm
 
 jobs:
   package_nois:
@@ -82,7 +85,7 @@ jobs:
             - target/debug/deps
           key: cargocache-v2-lint-rust:1.63.0-{{ checksum "Cargo.lock" }}
 
-  publish:
+  build-wasm:
     docker:
         - image: rust:1.63.0
     working_directory: ~/project
@@ -92,9 +95,19 @@ jobs:
       - run: apt update && apt install -y  npm
       - checkout:
           path: ~/project
+      - run: wasm-pack build --target web -- --features js
+
+      - store_artifacts:
+          path: pkg/
+          destination: pkg/
+  publish_npm:
+    docker:
+        - image: node:18.12.1-slim
+    steps:
+      - attach_workspace:
+          at: pkg/
       - run:
-          name: Run build wasm
-          command: wasm-pack build --target web -- --features js
+          name: publish npm
+          command: npm publish --auth-token=$NPM_TOKEN
           environment:
-            NPM_TOKEN: ${NPM_TOKEN}
-      - run: cd pkg && npm publish --auth-token=$NPM_TOKEN
+                NPM_TOKEN: ${NPM_TOKEN}
