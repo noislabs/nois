@@ -92,7 +92,8 @@ mod tests {
         /// Then it will generate many shuffled combinations our of it with subrand
         /// Then for each index of these sampled lists it will make a histogram of what characters were selectd for that index
         /// The result will be 10 histograms and every histogram will show how many "a" how many "b" ... "k"
-        /// Then we make 10 assertions per histogram so 100 assertions on whether that character was represented as expected within that index with 5
+        /// Then we make 10 assertions per histogram so 100 assertions on whether that character was represented as expected within that index with 5% accuracy
+        /// This test pretty much tests our Fisher Yates and our implementation of it
         use crate::sub_randomness::sub_randomness;
         use std::collections::HashMap;
 
