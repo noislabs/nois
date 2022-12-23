@@ -98,19 +98,17 @@ jobs:
       - persist_to_workspace:
           # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
           # taken to be the root directory of the workspace.
-          root: pkg
+          root: .
           # Must be relative path from root
           paths:
-            - *
+            - pkg/*
   publish_npm:
     docker:
         - image: node:18.12.1-slim
-    working_directory: /tmp
 
     steps:
       - attach_workspace:
-          # Must be absolute path or relative path from working_directory
-          at: /tmp
+          at: ./pkg
       - run:
           name: publish npm
           command: npm publish --auth-token=$NPM_TOKEN
