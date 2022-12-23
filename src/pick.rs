@@ -142,6 +142,12 @@ mod tests {
     }
 
     #[test]
+    #[should_panic = "attempt to pick more elements than the input length"]
+    fn pick_panicks_for_n_greater_than_len() {
+        let data = vec![1, 2, 3, 4];
+        let _picked = pick(RANDOMNESS1, 5, data);
+
+    #[test]
     fn test_pick_one_from_weighted_list() {
         let elements = vec![
             WeightedElement {
