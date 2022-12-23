@@ -108,9 +108,9 @@ jobs:
 
     steps:
       - attach_workspace:
-          at: ./pkg
+          at: ./
       - run:
           name: publish npm
-          command: npm publish --auth-token=$NPM_TOKEN
+          command: ls && ls pkg && cd pkg && npm publish --auth-token=$NPM_TOKEN
           environment:
             NPM_TOKEN: ${NPM_TOKEN}
