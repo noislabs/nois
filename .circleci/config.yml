@@ -117,7 +117,6 @@ jobs:
       - run: npm set "//registry.npmjs.org/:_authToken" $NPM_TOKEN
       - run:
           name: publish npm
-          command: env && cd pkg && npm publish --access public
-
+          command: cd pkg && npm publish --access public
           env:
             NPM_TOKEN: ${NPM_TOKEN}
