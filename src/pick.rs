@@ -168,7 +168,7 @@ mod tests {
         let selected_element = pick_one_from_weighted_list(RANDOMNESS1, &elements);
 
         // Check that the selected element has the expected weight
-        assert_eq!(selected_element, "c");
+        assert_eq!(selected_element, "b");
     }
     #[test]
     fn pick_one_from_weighted_list_distribution_is_uniform() {
