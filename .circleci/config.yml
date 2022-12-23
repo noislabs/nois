@@ -109,6 +109,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ./
+      - run: echo  "registry.npmjs.org/:_authToken=$NPM_TOKEN" > $HOME/.npmrc
+      - run: cat $HOME/.npmrc
       - run:
           name: publish npm
           command: env && cd pkg && npm publish --access public --auth-token=$NPM_TOKEN
