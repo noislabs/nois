@@ -105,12 +105,13 @@ jobs:
   publish_npm:
     docker:
         - image: node:18.12.1-slim
+    working_directory: ~/project/pkg
 
     steps:
       - attach_workspace:
           at: ./
       - run:
           name: publish npm
-          command: env && cd pkg && npm publish --auth-token=$NPM_TOKEN
+          command: env  && npm publish --auth-token=$NPM_TOKEN
           env:
             NPM_TOKEN: ${NPM_TOKEN}
