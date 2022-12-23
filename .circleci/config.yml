@@ -105,14 +105,14 @@ jobs:
   publish_npm:
     docker:
         - image: node:18.12.1-slim
-    working_directory: /pkg
+    working_directory: /tmp
 
     steps:
       - attach_workspace:
           # Must be absolute path or relative path from working_directory
-          at: /
+          at: /tmp
       - run:
           name: publish npm
-          command: pwd  && ls -l &&  cd /pkg &&  npm publish --auth-token=$NPM_TOKEN
+          command: npm publish --auth-token=$NPM_TOKEN
           environment:
             NPM_TOKEN: ${NPM_TOKEN}
