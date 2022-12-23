@@ -9,18 +9,18 @@ workflows:
 
   deploy:
     jobs:
-      - build_wasm
+      - build_wasm:
           filters:
-           tags:
-             only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
-           branches:
-             ignore: /.*/
+            tags:
+              only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
+            branches:
+              ignore: /.*/
       - publish_npm:
           filters:
-           tags:
-             only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
-           branches:
-             ignore: /.*/
+            tags:
+              only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
+            branches:
+              ignore: /.*/
           requires:
             - build_wasm
 
