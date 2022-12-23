@@ -112,5 +112,5 @@ jobs:
       - run:
           name: publish npm
           command: ls && ls pkg && cd pkg && npm publish --auth-token=$NPM_TOKEN
-          environment:
+          env:
             NPM_TOKEN: ${NPM_TOKEN}
