@@ -7,6 +7,18 @@ workflows:
       - package_nois
       - lint
 
+  deploy:
+    jobs:
+      - build_wasm
+      - publish_npm:
+          filters:
+           tags:
+             only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
+           branches:
+             ignore: /.*/
+          requires:
+            - build_wasm
+
 jobs:
   package_nois:
     docker:
@@ -45,7 +57,6 @@ jobs:
             - /usr/local/cargo/registry
             - target
           key: cargocache-v2-nois:1.63.0-{{ checksum "~/project/Cargo.lock" }}
-
   lint:
     docker:
       - image: rust:1.63.0
@@ -77,3 +88,35 @@ jobs:
             - target/debug/build
             - target/debug/deps
           key: cargocache-v2-lint-rust:1.63.0-{{ checksum "Cargo.lock" }}
+
+  build_wasm:
+    docker:
+        - image: rust:1.63.0
+    working_directory: ~/project
+    #if: github.event_name == 'tag' #will uncommoent after test
+    steps:
+      - run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      #- run: apt update && apt install -y  npm
+      - checkout:
+          path: ~/project
+      - run: wasm-pack build --target web -- --features js
+      - persist_to_workspace:
+          # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
+          # taken to be the root directory of the workspace.
+          root: .
+          # Must be relative path from root
+          paths:
+            - pkg/*
+
+  publish_npm:
+    docker:
+        - image: node:18.12.1-slim
+    steps:
+      - attach_workspace:
+          at: ./
+      - run: npm set "//registry.npmjs.org/:_authToken" $NPM_TOKEN
+      - run:
+          name: publish npm
+          command: cd pkg && npm publish --access public
+          env:
+            NPM_TOKEN: ${NPM_TOKEN}
