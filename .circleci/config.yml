@@ -96,10 +96,9 @@ jobs:
       - checkout:
           path: ~/project
       - run: wasm-pack build --target web -- --features js
-      - persist_to_workspace:
-          root: workspace
-          paths:
-            - pkg/
+      - store_artifacts:
+          path: pkg/
+          destination: pkg/
   publish_npm:
     docker:
         - image: node:18.12.1-slim
