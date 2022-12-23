@@ -1,5 +1,6 @@
 use rand::Rng;
 
+use crate::decimal::random_decimal;
 use crate::prng::make_prng;
 
 /// Picks `n` elements from a given list.
@@ -57,6 +58,62 @@ pub fn pick<T>(randomness: [u8; 32], n: usize, mut data: Vec<T>) -> Vec<T> {
     data.split_off(data.len() - n)
 }
 
+#[derive(Clone)]
+pub struct WeightedElement<T: Clone> {
+    pub element: T,
+    pub weight: f64,
+}
+
+/// Picks 1 element from a given weighted list.
+///
+///
+/// ## Examples
+///
+/// Pick 1 hat out of 3 hats with different rarity :
+///
+/// ```
+/// use nois::{randomness_from_str, pick_one_from_weighted_list, WeightedElement };
+///
+/// let randomness = randomness_from_str("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap();
+///
+///
+/// let data = vec![
+///             WeightedElement {
+///                 element: "green hat",
+///                 weight: 0.4,
+///             },
+///             WeightedElement {
+///                 element: "viking helmet",
+///                 weight: 0.55,
+///             },
+///             WeightedElement {
+///                 element: "rare gold crown",
+///                 weight: 0.05,
+///             },
+///         ];
+/// let picked = pick_one_from_weighted_list(randomness,  &data);
+///
+/// assert_eq!(picked, "green hat");
+/// ```
+pub fn pick_one_from_weighted_list<T: Clone>(
+    randomness: [u8; 32],
+    elements: &[WeightedElement<T>],
+) -> T {
+    let total_weight = elements.iter().map(|e| e.weight).sum::<f64>();
+
+    let r = random_decimal(randomness);
+    let mut weight_sum = 0.0;
+    for element in elements {
+        weight_sum += element.weight;
+        let r: f64 = r.to_string().parse().expect("invalid number string");
+        if r <= weight_sum / total_weight {
+            return element.element.clone();
+        }
+    }
+
+    // This point should never be reached
+    panic!("No element selected")
+}
 #[cfg(test)]
 mod tests {
     use crate::shuffle;
@@ -85,10 +142,95 @@ mod tests {
     }
 
     #[test]
-    #[should_panic = "attempt to pick more elements than the input length"]
-    fn pick_panicks_for_n_greater_than_len() {
-        let data = vec![1, 2, 3, 4];
-        let _picked = pick(RANDOMNESS1, 5, data);
+    fn test_pick_one_from_weighted_list() {
+        let elements = vec![
+            WeightedElement {
+                element: "a",
+                weight: 0.1,
+            },
+            WeightedElement {
+                element: "b",
+                weight: 0.5,
+            },
+            WeightedElement {
+                element: "c",
+                weight: 0.4,
+            },
+        ];
+
+        let selected_element = pick_one_from_weighted_list(RANDOMNESS1, &elements);
+
+        // Check that the selected element has the expected weight
+        assert_eq!(selected_element, "c");
+    }
+    #[test]
+    fn pick_one_from_weighted_list_distribution_is_uniform() {
+        /// This test will generate a huge amount  of subrandomness
+        /// then checks that the distribution is expected within a range of 1%
+        use crate::sub_randomness::sub_randomness;
+        use std::collections::HashMap;
+
+        const TEST_SAMPLE_SIZE: usize = 400_000;
+        const ACCURACY: f32 = 0.01;
+        // This test needs the sum of the weights to be equal to 1.
+        // Although the function should work as expected for weights that do not equal 1
+
+        let elements = vec![
+            WeightedElement {
+                element: "a",
+                weight: 0.1,
+            },
+            WeightedElement {
+                element: "b",
+                weight: 0.2,
+            },
+            WeightedElement {
+                element: "c",
+                weight: 0.03,
+            },
+            WeightedElement {
+                element: "d",
+                weight: 0.07,
+            },
+            WeightedElement {
+                element: "e",
+                weight: 0.6,
+            },
+        ];
+
+        let mut result = vec![];
+
+        for subrand in sub_randomness(RANDOMNESS1).take(TEST_SAMPLE_SIZE) {
+            result.push(pick_one_from_weighted_list(subrand, &elements));
+        }
+
+        let mut histogram = HashMap::new();
+
+        for element in result {
+            let count = histogram.entry(element).or_insert(0);
+            *count += 1;
+        }
+
+        // This will assert on all the elements of the data 1 by 1 and check if their occurence is within the 1% expected range
+        for (bin, count) in histogram {
+            let probability = elements
+                .iter()
+                .find(|e| e.element == bin)
+                .map(|e| e.weight)
+                .unwrap();
+            let estimated_count_for_uniform_distribution =
+                (TEST_SAMPLE_SIZE as f64 * probability) as f32;
+            let estimation_min: i32 =
+                (estimated_count_for_uniform_distribution * (1_f32 - ACCURACY)) as i32;
+            let estimation_max: i32 =
+                (estimated_count_for_uniform_distribution * (1_f32 + ACCURACY)) as i32;
+            println!(
+                "estimation {}, max: {}, min: {}",
+                estimated_count_for_uniform_distribution, estimation_max, estimation_min
+            );
+            println!("{}: {}", bin, count);
+            assert!(count >= estimation_min && count <= estimation_max);
+        }
     }
 
     #[test]

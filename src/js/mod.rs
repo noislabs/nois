@@ -77,6 +77,18 @@ pub fn pick(randomness: &str, n: u32, input: Box<[JsValue]>) -> Result<Box<[JsVa
     Ok(implementations::pick_impl(randomness, n, input)?)
 }
 
+//// Picks 1 element from a JavaScript weighted struct and returns it.
+//#[wasm_bindgen]
+//#[allow(dead_code)] // exported via wasm_bindgen
+//pub fn pick_one_from_weighted_list(
+//    randomness: &str,
+//    input: Box<[JsValue]>,
+//) -> Result<Box<[JsValue]>, JsValue> {
+//    Ok(implementations::pick_one_from_weighted_list_impl(
+//        randomness, input,
+//    )?)
+//}
+
 mod implementations {
     use super::safe_integer::to_safe_integer;
     use crate::{
@@ -208,4 +220,24 @@ mod implementations {
         let picked = pick(randomness, n as usize, a);
         Ok(picked.into_boxed_slice())
     }
+
+    //    pub fn pick_one_from_weighted_list_impl<T: Clone>(
+    //        randomness_hex: &str,
+    //        input: Box<[JsValue]>,
+    //    ) -> Result<Box<[JsValue]>, JsError> {
+    //        let randomness = randomness_from_str(randomness_hex)?;
+    //
+    //        // Convert the JS array of elements into a Rust slice of WeightedElement
+    //        let elements: &[WeightedElement<T>] = input
+    //            .iter()
+    //            .map(|e| WeightedElement {
+    //                element: e.get("element").expect("element field not found"),
+    //                weight: e.get("weight").expect("weight field not found"),
+    //            })
+    //            .collect::<Vec<_>>()
+    //            .as_slice();
+    //
+    //        let picked = pick_one_from_weighted_list(randomness, elements);
+    //        Ok(picked.into_boxed_slice())
+    //    }
 }
