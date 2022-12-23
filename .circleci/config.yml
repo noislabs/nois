@@ -9,7 +9,7 @@ workflows:
 
   deploy:
     jobs:
-      - build_wasm:
+      - build_wasm
       - publish_npm:
           requires:
             - build_wasm
@@ -52,7 +52,6 @@ jobs:
             - /usr/local/cargo/registry
             - target
           key: cargocache-v2-nois:1.63.0-{{ checksum "~/project/Cargo.lock" }}
-
   lint:
     docker:
       - image: rust:1.63.0
@@ -111,4 +110,4 @@ jobs:
           name: publish npm
           command: cd pkg && npm publish --auth-token=$NPM_TOKEN
           environment:
-                NPM_TOKEN: ${NPM_TOKEN}
+            NPM_TOKEN: ${NPM_TOKEN}
