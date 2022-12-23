@@ -101,7 +101,7 @@ jobs:
           root: pkg
           # Must be relative path from root
           paths:
-            - pkg
+            - *
   publish_npm:
     docker:
         - image: node:18.12.1-slim
