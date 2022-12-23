@@ -91,7 +91,7 @@ jobs:
     #if: github.event_name == 'tag' #will uncommoent after test
     steps:
       - run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-      - run: apt update && apt install -y  npm
+      #- run: apt update && apt install -y  npm
       - checkout:
           path: ~/project
       - run: wasm-pack build --target web -- --features js
@@ -108,6 +108,6 @@ jobs:
           at: /pkg
       - run:
           name: publish npm
-          command: ls && ls / && npm publish --auth-token=$NPM_TOKEN
+          command: ls -l pkg &&  cd pkg && npm publish --auth-token=$NPM_TOKEN
           environment:
             NPM_TOKEN: ${NPM_TOKEN}
