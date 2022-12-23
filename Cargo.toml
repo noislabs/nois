@@ -2,7 +2,7 @@
 name = "nois"
 description = "The Nois standard library"
 repository = "https://github.com/noislabs/nois"
-version = "0.6.0-beta.1"
+version = "0.6.0-beta.2"
 edition = "2021"
 license = "Apache-2.0"
 readme = "README.md"
