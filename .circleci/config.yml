@@ -56,9 +56,6 @@ jobs:
           name: Run unit tests
           command: cargo test --locked
       - run:
-          name: Check docs
-          command: cargo test --doc
-      - run:
           name: Run unit tests (js feature enabled)
           command: cargo test --locked --features js
       - save_cache:
