@@ -75,7 +75,7 @@ pub fn pick<T>(randomness: [u8; 32], n: usize, mut data: Vec<T>) -> Vec<T> {
 ///
 /// let picked = pick_one_from_weighted_list(randomness,  &data);
 ///
-/// assert_eq!(picked, "green hat");
+/// assert_eq!(picked, "viking helmet");
 /// ```
 pub fn pick_one_from_weighted_list<T: Clone + Copy>(
     randomness: [u8; 32],
@@ -87,7 +87,7 @@ pub fn pick_one_from_weighted_list<T: Clone + Copy>(
         .try_fold(0, |acc: u32, x| acc.checked_add(x))
         .unwrap_or_else(|| panic!("total_weight is greater than maximum value of u32"));
 
-    let r = int_in_range(randomness, 0, total_weight);
+    let r = int_in_range(randomness, 1, total_weight);
     let mut weight_sum = 0;
     for element in data {
         weight_sum += element.1;
@@ -139,7 +139,7 @@ mod tests {
         let selected_element = pick_one_from_weighted_list(RANDOMNESS1, &elements);
 
         // Check that the selected element has the expected weight
-        assert_eq!(selected_element, 'b');
+        assert_eq!(selected_element, 'c');
     }
     #[test]
     fn pick_one_from_weighted_list_distribution_is_uniform() {
@@ -149,7 +149,7 @@ mod tests {
         use std::collections::HashMap;
 
         const TEST_SAMPLE_SIZE: usize = 1_000_000;
-        const ACCURACY: f32 = 0.01;
+        const ACCURACY: f32 = 0.005;
         // This test needs the sum of the weights to be equal to 1.
         // Although the function should work as expected for weights that do not equal 1
         let elements: Vec<(char, u32)> =
