@@ -66,7 +66,7 @@ pub fn pick<T>(randomness: [u8; 32], n: usize, mut data: Vec<T>) -> Vec<T> {
 /// Pick 1 hat out of 3 hats with different rarity :
 ///
 /// ```
-/// use nois::{randomness_from_str, pick_one_from_weighted_list, WeightedElement };
+/// use nois::{randomness_from_str, pick_one_from_weighted_list };
 ///
 /// let randomness = randomness_from_str("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap();
 ///
