@@ -15,7 +15,7 @@ pub use decimal::random_decimal;
 pub use dice::roll_dice;
 pub use encoding::{randomness_from_str, RandomnessFromStrErr};
 pub use integers::{int_in_range, ints_in_range, Int};
-pub use pick::{pick, pick_one_from_weighted_list, WeightedElement};
+pub use pick::{pick, pick_one_from_weighted_list};
 pub use proxy::{NoisCallback, ProxyExecuteMsg, ReceiverExecuteMsg, MAX_JOB_ID_LEN};
 pub use shuffle::shuffle;
 pub use sub_randomness::{sub_randomness, sub_randomness_with_key, SubRandomnessProvider};

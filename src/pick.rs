@@ -58,12 +58,6 @@ pub fn pick<T>(randomness: [u8; 32], n: usize, mut data: Vec<T>) -> Vec<T> {
     data.split_off(data.len() - n)
 }
 
-#[derive(Clone)]
-pub struct WeightedElement<T: Clone> {
-    pub element: T,
-    pub weight: f64,
-}
-
 /// Picks 1 element from a given weighted list.
 ///
 ///
@@ -101,7 +95,6 @@ pub fn pick_one_from_weighted_list<T: Clone + Copy>(
             return element.0;
         }
     }
-
     // This point should never be reached
     panic!("No element selected")
 }
