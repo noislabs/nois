@@ -221,23 +221,15 @@ mod implementations {
         Ok(picked.into_boxed_slice())
     }
 
-    //    pub fn pick_one_from_weighted_list_impl<T: Clone>(
-    //        randomness_hex: &str,
-    //        input: Box<[JsValue]>,
-    //    ) -> Result<Box<[JsValue]>, JsError> {
-    //        let randomness = randomness_from_str(randomness_hex)?;
+    //pub fn pick_one_from_weighted_list_impl(
+    //    randomness_hex: &str,
+    //    input: Box<[JsValue]>,
+    //) -> Result<Box<[JsValue]>, JsError> {
+    //    let randomness = randomness_from_str(randomness_hex)?;
+    //    //let a: Vec<JsValue> = input.into();
+    //    let a: Vec<(JsValue, u32)> = input.into_iter().map(|x| x.as_ref().into()).collect();
     //
-    //        // Convert the JS array of elements into a Rust slice of WeightedElement
-    //        let elements: &[WeightedElement<T>] = input
-    //            .iter()
-    //            .map(|e| WeightedElement {
-    //                element: e.get("element").expect("element field not found"),
-    //                weight: e.get("weight").expect("weight field not found"),
-    //            })
-    //            .collect::<Vec<_>>()
-    //            .as_slice();
-    //
-    //        let picked = pick_one_from_weighted_list(randomness, elements);
-    //        Ok(picked.into_boxed_slice())
-    //    }
+    //    let picked = pick_one_from_weighted_list(randomness, &a);
+    //    Ok(picked.into_boxed_slice())
+    //}
 }
