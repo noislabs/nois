@@ -83,13 +83,21 @@ pub fn pick_one_from_weighted_list<T: Clone>(
     randomness: [u8; 32],
     data: &Vec<(T, u32)>,
 ) -> Result<T, String> {
+    for element in data {
+        if element.1 == 0 {
+            return Err(String::from("All element weights should be >= 1"));
+        }
+    }
+
     let total_weight = data
         .iter()
         .map(|element| element.1)
         .try_fold(0, |acc: u32, x| acc.checked_add(x))
         .unwrap_or_else(|| panic!("total_weight is greater than maximum value of u32"));
     if total_weight == 0 {
-        return Err(String::from("Total weight needs to be >= 1"));
+        return Err(String::from(
+            "Total weight needs to be >= 1 and data to pick from should not be empty",
+        ));
     }
 
     let r = int_in_range(randomness, 1, total_weight);
@@ -149,13 +157,27 @@ mod tests {
     }
 
     #[test]
-    fn test_pick_one_from_weighted_list_fails_on_total_weight_less_than_1() {
-        let elements: Vec<(i32, u32)> = vec![(1, 0), (2, 0), (-3, 0)];
+    fn test_pick_one_from_weighted_list_fails_on_total_weight_less_than_1_and_data_not_empty() {
+        //This will check that the list is empty
+        let elements: Vec<(i32, u32)> = vec![];
 
         let result = pick_one_from_weighted_list(RANDOMNESS1, &elements).unwrap_err();
 
         // Check that the selected element has the expected weight
-        assert_eq!(result, "Total weight needs to be >= 1");
+        assert_eq!(
+            result,
+            "Total weight needs to be >= 1 and data to pick from should not be empty"
+        );
+    }
+
+    #[test]
+    fn test_pick_one_from_weighted_list_fails_on_element_weight_less_than_1() {
+        let elements: Vec<(i32, u32)> = vec![(1, 5), (2, 4), (-3, 0)];
+
+        let result = pick_one_from_weighted_list(RANDOMNESS1, &elements).unwrap_err();
+
+        // Check that the selected element has the expected weight
+        assert_eq!(result, "All element weights should be >= 1");
     }
 
     #[test]
