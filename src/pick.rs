@@ -73,31 +73,35 @@ pub fn pick<T>(randomness: [u8; 32], n: usize, mut data: Vec<T>) -> Vec<T> {
 ///
 /// let data = vec![("green hat", 40), ("viking helmet", 55), ("rare golden crown", 5)];
 ///
-/// let picked = pick_one_from_weighted_list(randomness,  &data);
+/// let picked = pick_one_from_weighted_list(randomness,  &data).unwrap();
 ///
 /// assert_eq!(picked, "viking helmet");
 /// ```
-pub fn pick_one_from_weighted_list<T: Clone + Copy>(
+pub fn pick_one_from_weighted_list<T: Clone>(
     randomness: [u8; 32],
     data: &Vec<(T, u32)>,
-) -> T {
+) -> Result<T, String> {
     let total_weight = data
         .iter()
         .map(|element| element.1)
         .try_fold(0, |acc: u32, x| acc.checked_add(x))
-        .unwrap_or_else(|| panic!("total_weight is greater than maximum value of u32"));
+        .unwrap_or_else(|| panic!("total_weight is greater than maximum value of u32")); //Should we panic or let the dapp devs handle the result?
+    if total_weight == 0 {
+        return Err(String::from("Total weight needs to be >= 1"));
+    }
 
     let r = int_in_range(randomness, 1, total_weight);
     let mut weight_sum = 0;
     for element in data {
         weight_sum += element.1;
         if r <= weight_sum {
-            return element.0;
+            return Ok(element.0.clone());
         }
     }
     // This point should never be reached
     panic!("No element selected")
 }
+
 #[cfg(test)]
 mod tests {
     use crate::shuffle;
@@ -136,11 +140,22 @@ mod tests {
     fn test_pick_one_from_weighted_list() {
         let elements: Vec<(char, u32)> = vec![('a', 1), ('b', 5), ('c', 4)];
 
-        let selected_element = pick_one_from_weighted_list(RANDOMNESS1, &elements);
+        let selected_element = pick_one_from_weighted_list(RANDOMNESS1, &elements).unwrap();
 
         // Check that the selected element has the expected weight
         assert_eq!(selected_element, 'c');
     }
+
+    #[test]
+    fn test_pick_one_from_weighted_list_fails_on_total_weight_less_than_1() {
+        let elements: Vec<(i32, u32)> = vec![(1, 0), (2, 0), (-3, 0)];
+
+        let result = pick_one_from_weighted_list(RANDOMNESS1, &elements).unwrap_err();
+
+        // Check that the selected element has the expected weight
+        assert_eq!(result, "Total weight needs to be >= 1");
+    }
+
     #[test]
     fn pick_one_from_weighted_list_distribution_is_uniform() {
         /// This test will generate a huge amount  of subrandomness
@@ -152,15 +167,20 @@ mod tests {
         const ACCURACY: f32 = 0.005;
         // This test needs the sum of the weights to be equal to 1.
         // Although the function should work as expected for weights that do not equal 1
-        let elements: Vec<(char, u32)> =
-            vec![('a', 100), ('b', 200), ('c', 30), ('d', 70), ('e', 600)];
+        let elements: Vec<(String, u32)> = vec![
+            (String::from("a"), 100),
+            (String::from("b"), 200),
+            (String::from("c"), 30),
+            (String::from("d"), 70),
+            (String::from("e"), 600),
+        ];
         let total_weight = elements.iter().map(|element| element.1).sum::<u32>();
         println!("total weight: {}", total_weight);
 
         let mut result = vec![];
 
         for subrand in sub_randomness(RANDOMNESS1).take(TEST_SAMPLE_SIZE) {
-            result.push(pick_one_from_weighted_list(subrand, &elements));
+            result.push(pick_one_from_weighted_list(subrand, &elements).unwrap());
         }
 
         let mut histogram = HashMap::new();
@@ -187,12 +207,13 @@ mod tests {
             assert!(count >= estimation_min && count <= estimation_max);
         }
     }
+
     #[test]
     #[should_panic = "total_weight is greater than maximum value of u32"]
     fn test_pick_one_from_weighted_list_fails_on_weight_overflow() {
         let elements: Vec<(char, u32)> = vec![('a', 4294967288), ('b', 5), ('c', 4)];
 
-        let selected_element = pick_one_from_weighted_list(RANDOMNESS1, &elements);
+        let selected_element = pick_one_from_weighted_list(RANDOMNESS1, &elements).unwrap();
 
         // Check that the selected element has the expected weight
         assert_eq!(selected_element, 'a');
