@@ -77,6 +77,8 @@ pub fn pick<T>(randomness: [u8; 32], n: usize, mut data: Vec<T>) -> Vec<T> {
 ///
 /// assert_eq!(picked, "viking helmet");
 /// ```
+/// ## Panics
+/// This function will panic when the total weight is less than 1
 pub fn pick_one_from_weighted_list<T: Clone>(
     randomness: [u8; 32],
     data: &Vec<(T, u32)>,
@@ -85,7 +87,7 @@ pub fn pick_one_from_weighted_list<T: Clone>(
         .iter()
         .map(|element| element.1)
         .try_fold(0, |acc: u32, x| acc.checked_add(x))
-        .unwrap_or_else(|| panic!("total_weight is greater than maximum value of u32")); //Should we panic or let the dapp devs handle the result?
+        .unwrap_or_else(|| panic!("total_weight is greater than maximum value of u32"));
     if total_weight == 0 {
         return Err(String::from("Total weight needs to be >= 1"));
     }
