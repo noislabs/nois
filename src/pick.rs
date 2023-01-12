@@ -89,7 +89,7 @@ pub fn pick<T>(randomness: [u8; 32], n: usize, mut data: Vec<T>) -> Vec<T> {
 /// This function will panic when the total weight is less than 1
 pub fn pick_one_from_weighted_list<T: Clone>(
     randomness: [u8; 32],
-    data: &Vec<(T, u32)>,
+    data: &[(T, u32)],
 ) -> Result<T, String> {
     for element in data {
         if element.1 == 0 {
@@ -189,6 +189,11 @@ mod tests {
         ];
         let picked = pick_one_from_weighted_list(RANDOMNESS1, &elements).unwrap();
         assert_eq!(picked, Color("orange".to_string()));
+
+        // Pick from slice
+        let selection = &elements[0..3];
+        let picked = pick_one_from_weighted_list(RANDOMNESS1, selection).unwrap();
+        assert_eq!(picked, Color("green".to_string()));
     }
 
     #[test]
