@@ -60,40 +60,47 @@ pub fn pick<T>(randomness: [u8; 32], n: usize, mut data: Vec<T>) -> Vec<T> {
 
 /// Picks 1 element from a given weighted list.
 ///
+/// In contrast to [`pick`] this does not move the picked element from the input list
+/// but requires elements to be `Clone`able. This because only one element is needed.
+/// It could be implemented differently though.
 ///
 /// ## Examples
 ///
-/// Pick 1 hat out of 3 hats with different rarity :
+/// Pick 1 hat out of 3 hats with different rarity:
 ///
 /// ```
-/// use nois::{randomness_from_str, pick_one_from_weighted_list };
+/// use nois::{randomness_from_str, pick_one_from_weighted_list};
 ///
 /// let randomness = randomness_from_str("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap();
 ///
+/// let data = vec![
+///     ("green hat", 40),
+///     ("viking helmet", 55),
+///     ("rare golden crown", 5)
+/// ];
 ///
-/// let data = vec![("green hat", 40), ("viking helmet", 55), ("rare golden crown", 5)];
-///
-/// let picked = pick_one_from_weighted_list(randomness,  &data).unwrap();
+/// let picked = pick_one_from_weighted_list(randomness, &data).unwrap();
 ///
 /// assert_eq!(picked, "viking helmet");
 /// ```
+///
 /// ## Panics
+///
 /// This function will panic when the total weight is less than 1
 pub fn pick_one_from_weighted_list<T: Clone>(
     randomness: [u8; 32],
-    data: &Vec<(T, u32)>,
+    data: &[(T, u32)],
 ) -> Result<T, String> {
-    for element in data {
-        if element.1 == 0 {
+    let mut total_weight: u32 = 0;
+    for (_, weight) in data {
+        if *weight == 0 {
             return Err(String::from("All element weights should be >= 1"));
         }
+        total_weight = total_weight
+            .checked_add(*weight)
+            .expect("total weight is greater than maximum value of u32");
     }
 
-    let total_weight = data
-        .iter()
-        .map(|element| element.1)
-        .try_fold(0, |acc: u32, x| acc.checked_add(x))
-        .unwrap_or_else(|| panic!("total_weight is greater than maximum value of u32"));
     if total_weight == 0 {
         return Err(String::from(
             "Total weight needs to be >= 1 and data to pick from should not be empty",
@@ -137,6 +144,23 @@ mod tests {
         let picked = pick(RANDOMNESS1, 3, data);
         assert_eq!(picked.len(), 3);
         assert_ne!(picked, vec![2, 3, 4]);
+
+        // Element type is neither Copy nor Clone, i.e. the result is moved ot of the input data.
+        #[derive(PartialEq, Debug)]
+        struct Continent(String);
+        let data = vec![
+            Continent("Africa".into()),
+            Continent("America".to_string()),
+            Continent("Antarctica".to_string()),
+            Continent("Australia".to_string()),
+            Continent("Eurasia".to_string()),
+        ];
+        let picked = pick(RANDOMNESS1, 2, data);
+        assert_eq!(picked.len(), 2);
+        assert_eq!(
+            picked,
+            vec![Continent("America".into()), Continent("Eurasia".into())]
+        );
     }
 
     #[test]
@@ -147,13 +171,28 @@ mod tests {
     }
 
     #[test]
-    fn test_pick_one_from_weighted_list() {
+    fn pick_one_from_weighted_list_works() {
         let elements: Vec<(char, u32)> = vec![('a', 1), ('b', 5), ('c', 4)];
+        let picked = pick_one_from_weighted_list(RANDOMNESS1, &elements).unwrap();
+        assert_eq!(picked, 'c');
 
-        let selected_element = pick_one_from_weighted_list(RANDOMNESS1, &elements).unwrap();
+        // Element type is Clone but not Copy
+        #[derive(PartialEq, Debug, Clone)]
+        struct Color(String);
+        let elements = vec![
+            (Color("red".into()), 12),
+            (Color("blue".to_string()), 15),
+            (Color("green".to_string()), 8),
+            (Color("orange".to_string()), 21),
+            (Color("pink".to_string()), 11),
+        ];
+        let picked = pick_one_from_weighted_list(RANDOMNESS1, &elements).unwrap();
+        assert_eq!(picked, Color("orange".to_string()));
 
-        // Check that the selected element has the expected weight
-        assert_eq!(selected_element, 'c');
+        // Pick from slice
+        let selection = &elements[0..3];
+        let picked = pick_one_from_weighted_list(RANDOMNESS1, selection).unwrap();
+        assert_eq!(picked, Color("green".to_string()));
     }
 
     #[test]
@@ -233,7 +272,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic = "total_weight is greater than maximum value of u32"]
+    #[should_panic = "total weight is greater than maximum value of u32"]
     fn test_pick_one_from_weighted_list_fails_on_weight_overflow() {
         let elements: Vec<(char, u32)> = vec![('a', 4294967288), ('b', 5), ('c', 4)];
 
