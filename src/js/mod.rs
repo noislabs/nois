@@ -77,6 +77,18 @@ pub fn pick(randomness: &str, n: u32, input: Box<[JsValue]>) -> Result<Box<[JsVa
     Ok(implementations::pick_impl(randomness, n, input)?)
 }
 
+//// Picks 1 element from a JavaScript weighted struct and returns it.
+//#[wasm_bindgen]
+//#[allow(dead_code)] // exported via wasm_bindgen
+//pub fn pick_one_from_weighted_list(
+//    randomness: &str,
+//    input: Box<[JsValue]>,
+//) -> Result<Box<[JsValue]>, JsValue> {
+//    Ok(implementations::pick_one_from_weighted_list_impl(
+//        randomness, input,
+//    )?)
+//}
+
 mod implementations {
     use super::safe_integer::to_safe_integer;
     use crate::{
@@ -208,4 +220,16 @@ mod implementations {
         let picked = pick(randomness, n as usize, a);
         Ok(picked.into_boxed_slice())
     }
+
+    //pub fn pick_one_from_weighted_list_impl(
+    //    randomness_hex: &str,
+    //    input: Box<[JsValue]>,
+    //) -> Result<Box<[JsValue]>, JsError> {
+    //    let randomness = randomness_from_str(randomness_hex)?;
+    //    //let a: Vec<JsValue> = input.into();
+    //    let a: Vec<(JsValue, u32)> = input.into_iter().map(|x| x.as_ref().into()).collect();
+    //
+    //    let picked = pick_one_from_weighted_list(randomness, &a);
+    //    Ok(picked.into_boxed_slice())
+    //}
 }
