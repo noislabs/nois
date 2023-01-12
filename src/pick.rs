@@ -91,17 +91,16 @@ pub fn pick_one_from_weighted_list<T: Clone>(
     randomness: [u8; 32],
     data: &[(T, u32)],
 ) -> Result<T, String> {
-    for element in data {
-        if element.1 == 0 {
+    let mut total_weight: u32 = 0;
+    for (_, weight) in data {
+        if *weight == 0 {
             return Err(String::from("All element weights should be >= 1"));
         }
+        total_weight = total_weight
+            .checked_add(*weight)
+            .expect("total weight is greater than maximum value of u32");
     }
 
-    let total_weight = data
-        .iter()
-        .map(|element| element.1)
-        .try_fold(0, |acc: u32, x| acc.checked_add(x))
-        .unwrap_or_else(|| panic!("total_weight is greater than maximum value of u32"));
     if total_weight == 0 {
         return Err(String::from(
             "Total weight needs to be >= 1 and data to pick from should not be empty",
@@ -273,7 +272,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic = "total_weight is greater than maximum value of u32"]
+    #[should_panic = "total weight is greater than maximum value of u32"]
     fn test_pick_one_from_weighted_list_fails_on_weight_overflow() {
         let elements: Vec<(char, u32)> = vec![('a', 4294967288), ('b', 5), ('c', 4)];
 
