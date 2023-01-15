@@ -1,3 +1,10 @@
+//! # nois
+//!
+//! `nois` is a collection of utilities to help you interact with the Nois network
+//! Use this library to :
+//! * Integrate your app with the nois proxy.
+//! * Safely transform and manipulate your randomness.
+
 mod coinflip;
 mod decimal;
 mod dice;
