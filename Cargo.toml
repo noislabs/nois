@@ -13,7 +13,7 @@ readme = "README.md"
 crate-type = ["cdylib", "rlib"]
 
 [features]
-js = ["wasm-bindgen"]
+js = ["wasm-bindgen", "js-sys"]
 
 [dependencies]
 cosmwasm-std = { version = "1.1.8" }
@@ -24,6 +24,7 @@ thiserror = { version = "1.0.23" }
 rand_xoshiro = { version = "0.6.0", default-features = false }
 xxhash-rust = { version = "0.8.5", features = ["xxh3"] }
 wasm-bindgen = { version = "0.2.83", optional = true }
+js-sys = { version = "0.3.60", optional = true }
 
 # Deactivate default features in order to be able to use this on systems without
 # access to an entropy souce via getrandom such as wasm32-unknown-unknown
