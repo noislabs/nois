@@ -64,6 +64,9 @@ pub fn pick<T>(randomness: [u8; 32], n: usize, mut data: Vec<T>) -> Vec<T> {
 /// but requires elements to be `Clone`able. This because only one element is needed.
 /// It could be implemented differently though.
 ///
+/// The list must not be empty. Each element must have a non-zeo weight.
+/// The total weight must not exceed the u32 range.
+///
 /// ## Examples
 ///
 /// Pick 1 hat out of 3 hats with different rarity:
@@ -73,43 +76,42 @@ pub fn pick<T>(randomness: [u8; 32], n: usize, mut data: Vec<T>) -> Vec<T> {
 ///
 /// let randomness = randomness_from_str("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap();
 ///
-/// let data = vec![
+/// let list = vec![
 ///     ("green hat", 40),
 ///     ("viking helmet", 55),
 ///     ("rare golden crown", 5)
 /// ];
 ///
-/// let picked = pick_one_from_weighted_list(randomness, &data).unwrap();
+/// let picked = pick_one_from_weighted_list(randomness, &list).unwrap();
 ///
 /// assert_eq!(picked, "viking helmet");
 /// ```
-///
-/// ## Panics
-///
-/// This function will panic when the total weight is less than 1
 pub fn pick_one_from_weighted_list<T: Clone>(
     randomness: [u8; 32],
-    data: &[(T, u32)],
+    list: &[(T, u32)],
 ) -> Result<T, String> {
+    if list.is_empty() {
+        return Err(String::from("List must not be empty"));
+    }
+
     let mut total_weight: u32 = 0;
-    for (_, weight) in data {
+    for (_, weight) in list {
         if *weight == 0 {
             return Err(String::from("All element weights should be >= 1"));
         }
         total_weight = total_weight
             .checked_add(*weight)
-            .expect("total weight is greater than maximum value of u32");
+            .ok_or_else(|| String::from("Total weight is greater than maximum value of u32"))?;
     }
 
-    if total_weight == 0 {
-        return Err(String::from(
-            "Total weight needs to be >= 1 and data to pick from should not be empty",
-        ));
-    }
+    debug_assert!(
+        total_weight > 0,
+        "we know we have a non-empty list of non-zero elements"
+    );
 
     let r = int_in_range(randomness, 1, total_weight);
     let mut weight_sum = 0;
-    for element in data {
+    for element in list {
         weight_sum += element.1;
         if r <= weight_sum {
             return Ok(element.0.clone());
@@ -196,27 +198,34 @@ mod tests {
     }
 
     #[test]
-    fn test_pick_one_from_weighted_list_fails_on_total_weight_less_than_1_and_data_not_empty() {
+    fn test_pick_one_from_weighted_list_fails_on_empty_list() {
         //This will check that the list is empty
         let elements: Vec<(i32, u32)> = vec![];
 
-        let result = pick_one_from_weighted_list(RANDOMNESS1, &elements).unwrap_err();
+        let err = pick_one_from_weighted_list(RANDOMNESS1, &elements).unwrap_err();
 
         // Check that the selected element has the expected weight
-        assert_eq!(
-            result,
-            "Total weight needs to be >= 1 and data to pick from should not be empty"
-        );
+        assert_eq!(err, "List must not be empty");
     }
 
     #[test]
     fn test_pick_one_from_weighted_list_fails_on_element_weight_less_than_1() {
         let elements: Vec<(i32, u32)> = vec![(1, 5), (2, 4), (-3, 0)];
 
-        let result = pick_one_from_weighted_list(RANDOMNESS1, &elements).unwrap_err();
+        let err = pick_one_from_weighted_list(RANDOMNESS1, &elements).unwrap_err();
 
         // Check that the selected element has the expected weight
-        assert_eq!(result, "All element weights should be >= 1");
+        assert_eq!(err, "All element weights should be >= 1");
+    }
+
+    #[test]
+    fn test_pick_one_from_weighted_list_fails_with_total_weight_too_high() {
+        let elements: Vec<(i32, u32)> = vec![(1, u32::MAX), (2, 1)];
+
+        let err = pick_one_from_weighted_list(RANDOMNESS1, &elements).unwrap_err();
+
+        // Check that the selected element has the expected weight
+        assert_eq!(err, "Total weight is greater than maximum value of u32");
     }
 
     #[test]
@@ -269,17 +278,6 @@ mod tests {
             println!("{}: {}", bin, count);
             assert!(count >= estimation_min && count <= estimation_max);
         }
-    }
-
-    #[test]
-    #[should_panic = "total weight is greater than maximum value of u32"]
-    fn test_pick_one_from_weighted_list_fails_on_weight_overflow() {
-        let elements: Vec<(char, u32)> = vec![('a', 4294967288), ('b', 5), ('c', 4)];
-
-        let selected_element = pick_one_from_weighted_list(RANDOMNESS1, &elements).unwrap();
-
-        // Check that the selected element has the expected weight
-        assert_eq!(selected_element, 'a');
     }
 
     #[test]

@@ -116,22 +116,24 @@ JS/Wasm bindings are created using wasm-bindgen.
 
 The JS does not match 100% the contract implementation. The differences are documented here.
 
-| Contract function        | JS function      | Status   | Note                                                                 |
-| ------------------------ | ---------------- | -------- | -------------------------------------------------------------------- |
-| [`nois::coinflip`]       | `coinflip`       | ✅ Ready | Returns string instead of enum                                       |
-| [`nois::roll_dice`]      | `roll_dice`      | ✅ Ready |                                                                      |
-| [`nois::int_in_range`]   | `int_in_range`   | ✅ Ready | Only supports safe integer range                                     |
-| [`nois::ints_in_range`]  | `ints_in_range`  | ✅ Ready | Only supports safe integer range                                     |
-| [`nois::pick`]           | `pick`           | ✅ Ready |                                                                      |
-| [`nois::random_decimal`] | `random_decimal` | ✅ Ready | Encodes result Decimal as string                                     |
-| [`nois::sub_randomness`] | `sub_randomness` | ✅ Ready | Takes a `count` argument and returns an Array instead of an iterator |
-| [`nois::shuffle`]        | `shuffle`        | ✅ Ready |                                                                      |
+| Contract function                     | JS function                   | Status   | Note                                                                 |
+| ------------------------------------- | ----------------------------- | -------- | -------------------------------------------------------------------- |
+| [`nois::coinflip`]                    | `coinflip`                    | ✅ Ready | Returns string instead of enum                                       |
+| [`nois::roll_dice`]                   | `roll_dice`                   | ✅ Ready |                                                                      |
+| [`nois::int_in_range`]                | `int_in_range`                | ✅ Ready | Only supports safe integer range                                     |
+| [`nois::ints_in_range`]               | `ints_in_range`               | ✅ Ready | Only supports safe integer range                                     |
+| [`nois::pick`]                        | `pick`                        | ✅ Ready |                                                                      |
+| [`nois::pick_one_from_weighted_list`] | `pick_one_from_weighted_list` | ✅ Ready |                                                                      |
+| [`nois::random_decimal`]              | `random_decimal`              | ✅ Ready | Encodes result Decimal as string                                     |
+| [`nois::sub_randomness`]              | `sub_randomness`              | ✅ Ready | Takes a `count` argument and returns an Array instead of an iterator |
+| [`nois::shuffle`]                     | `shuffle`                     | ✅ Ready |                                                                      |
 
 [`nois::coinflip`]: https://docs.rs/nois/latest/nois/fn.coinflip.html
 [`nois::roll_dice`]: https://docs.rs/nois/latest/nois/fn.roll_dice.html
 [`nois::int_in_range`]: https://docs.rs/nois/latest/nois/fn.int_in_range.html
 [`nois::ints_in_range`]: https://docs.rs/nois/latest/nois/fn.ints_in_range.html
 [`nois::pick`]: https://docs.rs/nois/latest/nois/fn.pick.html
+[`nois::pick_one_from_weighted_list`]: https://docs.rs/nois/latest/nois/fn.pick_one_from_weighted_list.html
 [`nois::random_decimal`]: https://docs.rs/nois/latest/nois/fn.random_decimal.html
 [`nois::sub_randomness`]: https://docs.rs/nois/latest/nois/fn.sub_randomness.html
 [`nois::shuffle`]: https://docs.rs/nois/latest/nois/fn.shuffle.html
@@ -153,7 +155,7 @@ This creates a CommonJS module that is loaded synchonously.
 ```
 $ wasm-pack build --target nodejs -- --features js
 $ node
-> const { coinflip, roll_dice, random_decimal, sub_randomness, int_in_range, ints_in_range, pick, shuffle } = require('./pkg/nois');
+> const { coinflip, roll_dice, random_decimal, sub_randomness, int_in_range, ints_in_range, pick, pick_one_from_weighted_list, shuffle } = require('./pkg/nois');
 
 // Round 2497992
 
@@ -186,6 +188,8 @@ $ node
 [ 2, 'a', 1, 'b', 3, true ]
 > pick("2267ba7356c01a58e405d4194a31bddc3fd3eb1f0a86758f7a609ba8a47420ba", 4, [1, 2, 3, "a", "b", true])
 [ 'a', 'b', 3, true ]
+> pick_one_from_weighted_list("2267ba7356c01a58e405d4194a31bddc3fd3eb1f0a86758f7a609ba8a47420ba", [["red", 20], ["blue", 70]])
+'blue'
 ```
 
 **For browsers and other JS environments**

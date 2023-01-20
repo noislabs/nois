@@ -77,32 +77,39 @@ pub fn pick(randomness: &str, n: u32, input: Box<[JsValue]>) -> Result<Box<[JsVa
     Ok(implementations::pick_impl(randomness, n, input)?)
 }
 
-//// Picks 1 element from a JavaScript weighted struct and returns it.
-//#[wasm_bindgen]
-//#[allow(dead_code)] // exported via wasm_bindgen
-//pub fn pick_one_from_weighted_list(
-//    randomness: &str,
-//    input: Box<[JsValue]>,
-//) -> Result<Box<[JsValue]>, JsValue> {
-//    Ok(implementations::pick_one_from_weighted_list_impl(
-//        randomness, input,
-//    )?)
-//}
+//// Picks 1 element from a JavaScript weighted list and returns it.
+#[wasm_bindgen]
+#[allow(dead_code)] // exported via wasm_bindgen
+pub fn pick_one_from_weighted_list(
+    randomness: &str,
+    input: Box<[JsValue]>,
+) -> Result<JsValue, JsValue> {
+    Ok(implementations::pick_one_from_weighted_list_impl(
+        randomness, input,
+    )?)
+}
 
 mod implementations {
-    use super::safe_integer::to_safe_integer;
+    use super::safe_integer::{to_safe_integer, to_u32};
     use crate::{
-        coinflip, int_in_range, ints_in_range, pick, random_decimal, randomness_from_str,
-        roll_dice, shuffle, sub_randomness, RandomnessFromStrErr,
+        coinflip, int_in_range, ints_in_range, pick, pick_one_from_weighted_list, random_decimal,
+        randomness_from_str, roll_dice, shuffle, sub_randomness, RandomnessFromStrErr,
     };
     use cosmwasm_std::Decimal;
     use wasm_bindgen::JsValue;
 
+    #[derive(Debug, PartialEq, Eq)]
     pub struct JsError(String);
 
     impl From<RandomnessFromStrErr> for JsError {
         fn from(source: RandomnessFromStrErr) -> Self {
             Self(source.to_string())
+        }
+    }
+
+    impl From<String> for JsError {
+        fn from(source: String) -> Self {
+            Self(source)
         }
     }
 
@@ -221,15 +228,36 @@ mod implementations {
         Ok(picked.into_boxed_slice())
     }
 
-    //pub fn pick_one_from_weighted_list_impl(
-    //    randomness_hex: &str,
-    //    input: Box<[JsValue]>,
-    //) -> Result<Box<[JsValue]>, JsError> {
-    //    let randomness = randomness_from_str(randomness_hex)?;
-    //    //let a: Vec<JsValue> = input.into();
-    //    let a: Vec<(JsValue, u32)> = input.into_iter().map(|x| x.as_ref().into()).collect();
-    //
-    //    let picked = pick_one_from_weighted_list(randomness, &a);
-    //    Ok(picked.into_boxed_slice())
-    //}
+    pub fn pick_one_from_weighted_list_impl(
+        randomness_hex: &str,
+        input: Box<[JsValue]>,
+    ) -> Result<JsValue, JsError> {
+        let randomness = randomness_from_str(randomness_hex)?;
+
+        let mut pairs: Vec<(JsValue, u32)> = Vec::new();
+        for (idx, element) in input.into_iter().enumerate() {
+            let element = js_sys::Array::from(element);
+            let len = element.length();
+            if len != 2 {
+                return Err(JsError(format!(
+                    "Found array of length {len} (expected 2) at position {idx}."
+                )));
+            }
+            let item = element.get(0);
+            let weight = match element.get(1).as_f64() {
+                Some(w) => to_u32(w).ok_or(JsError(format!(
+                    "Weight component is not in uint32 range at position {idx}."
+                )))?,
+                None => {
+                    return Err(JsError(format!(
+                        "Weight component is not a number at position {idx}."
+                    )))
+                }
+            };
+            pairs.push((item, weight));
+        }
+
+        let picked = pick_one_from_weighted_list(randomness, &pairs)?;
+        Ok(picked)
+    }
 }
