@@ -80,11 +80,8 @@ pub fn pick(randomness: &str, n: u32, input: Box<[JsValue]>) -> Result<Box<[JsVa
 //// Picks 1 element from a JavaScript weighted list and returns it.
 #[wasm_bindgen]
 #[allow(dead_code)] // exported via wasm_bindgen
-pub fn pick_one_from_weighted_list(
-    randomness: &str,
-    input: Box<[JsValue]>,
-) -> Result<JsValue, JsValue> {
-    Ok(implementations::pick_one_from_weighted_list_impl(
+pub fn select_from_weighted(randomness: &str, input: Box<[JsValue]>) -> Result<JsValue, JsValue> {
+    Ok(implementations::select_from_weighted_impl(
         randomness, input,
     )?)
 }
@@ -92,8 +89,8 @@ pub fn pick_one_from_weighted_list(
 mod implementations {
     use super::safe_integer::{to_safe_integer, to_u32};
     use crate::{
-        coinflip, int_in_range, ints_in_range, pick, pick_one_from_weighted_list, random_decimal,
-        randomness_from_str, roll_dice, shuffle, sub_randomness, RandomnessFromStrErr,
+        coinflip, int_in_range, ints_in_range, pick, random_decimal, randomness_from_str,
+        roll_dice, select_from_weighted, shuffle, sub_randomness, RandomnessFromStrErr,
     };
     use cosmwasm_std::Decimal;
     use wasm_bindgen::JsValue;
@@ -228,7 +225,7 @@ mod implementations {
         Ok(picked.into_boxed_slice())
     }
 
-    pub fn pick_one_from_weighted_list_impl(
+    pub fn select_from_weighted_impl(
         randomness_hex: &str,
         input: Box<[JsValue]>,
     ) -> Result<JsValue, JsError> {
@@ -257,7 +254,7 @@ mod implementations {
             pairs.push((item, weight));
         }
 
-        let picked = pick_one_from_weighted_list(randomness, &pairs)?;
-        Ok(picked)
+        let selected = select_from_weighted(randomness, &pairs)?;
+        Ok(selected)
     }
 }
