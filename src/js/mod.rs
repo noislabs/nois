@@ -92,8 +92,8 @@ pub fn pick_one_from_weighted_list(
 mod implementations {
     use super::safe_integer::{to_safe_integer, to_u32};
     use crate::{
-        coinflip, int_in_range, ints_in_range, pick, pick_one_from_weighted_list, random_decimal,
-        randomness_from_str, roll_dice, shuffle, sub_randomness, RandomnessFromStrErr,
+        coinflip, int_in_range, ints_in_range, pick, random_decimal, randomness_from_str,
+        roll_dice, select_from_weighted, shuffle, sub_randomness, RandomnessFromStrErr,
     };
     use cosmwasm_std::Decimal;
     use wasm_bindgen::JsValue;
@@ -257,7 +257,7 @@ mod implementations {
             pairs.push((item, weight));
         }
 
-        let picked = pick_one_from_weighted_list(randomness, &pairs)?;
-        Ok(picked)
+        let selected = select_from_weighted(randomness, &pairs)?;
+        Ok(selected)
     }
 }
