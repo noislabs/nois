@@ -42,6 +42,10 @@ pub enum ProxyExecuteMsg {
 pub struct NoisCallback {
     /// The ID chosen by the caller for this job. Use this field to map responses to requests.
     pub job_id: String,
+    /// The point in time when the randomness was first published. This information is provided
+    /// by the randomness provider. This is not the time when the randomness was processed on chain.
+    pub published: Timestamp,
+    /// The randomness. This is guaranteed to be 32 bytes long.
     pub randomness: HexBinary,
 }
 
@@ -65,13 +69,17 @@ mod tests {
         let msg = ReceiverExecuteMsg::NoisReceive {
             callback: NoisCallback {
                 job_id: "first".to_string(),
-                randomness: HexBinary::from_hex("aabbcc").unwrap(),
+                published: Timestamp::from_seconds(1682086395),
+                randomness: HexBinary::from_hex(
+                    "aabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccdd",
+                )
+                .unwrap(),
             },
         };
         let ser = to_vec(&msg).unwrap();
         assert_eq!(
             ser,
-            br#"{"nois_receive":{"callback":{"job_id":"first","randomness":"aabbcc"}}}"#
+            br#"{"nois_receive":{"callback":{"job_id":"first","published":"1682086395000000000","randomness":"aabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccdd"}}}"#
         );
     }
 }
