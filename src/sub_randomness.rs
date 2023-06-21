@@ -115,6 +115,8 @@ pub fn sub_randomness(randomness: [u8; 32]) -> Box<SubRandomnessProvider> {
 
 #[cfg(test)]
 mod tests {
+    use crate::{coinflip, pick, RANDOMNESS1};
+
     use super::*;
 
     #[test]
@@ -181,5 +183,98 @@ mod tests {
         println!("v2 = {v2:?}");
         println!("v3 = {v3:?}");
         println!("v4 = {v4:?}");
+    }
+    #[test]
+    fn coinflip_distribution_is_uniform() {
+        /// This test will generate a huge amount  of subrandomness
+        /// and throws a coin with every subrandomness
+        /// then checks that the distribution is expected within a range of 1%
+        use crate::sub_randomness::sub_randomness;
+        use std::collections::HashMap;
+
+        const TEST_SAMPLE_SIZE: usize = 100_000;
+        const ACCURACY: f32 = 0.01;
+
+        let mut result = vec![];
+
+        let mut provider = sub_randomness(RANDOMNESS1);
+
+        for _ in 0..TEST_SAMPLE_SIZE {
+            let flip_is_heads = coinflip(provider.next().unwrap()).is_heads();
+            println!("{}", flip_is_heads);
+            result.push(flip_is_heads);
+        }
+
+        let mut histogram = HashMap::new();
+
+        for element in result {
+            let count = histogram.entry(element).or_insert(0);
+            *count += 1;
+        }
+
+        let estimated_count_for_uniform_distribution = (TEST_SAMPLE_SIZE / 2) as f32;
+        let estimation_min: i32 =
+            (estimated_count_for_uniform_distribution * (1_f32 - ACCURACY)) as i32;
+        let estimation_max: i32 =
+            (estimated_count_for_uniform_distribution * (1_f32 + ACCURACY)) as i32;
+        println!(
+            "estimation {}, max: {}, min: {}",
+            estimated_count_for_uniform_distribution, estimation_max, estimation_min
+        );
+        // This will assert on all the elements of the data 1 by 1 and check if their occurence is within the 1% expected range
+        for (bin, count) in histogram {
+            println!("{}: {}", bin, count);
+            assert!(count >= estimation_min && count <= estimation_max);
+        }
+    }
+
+    #[test]
+    fn pick_distribution_is_uniform() {
+        /// This test will generate a huge amount  of subrandomness and picks n elements from the list
+        /// It will then test that the outcome of every possibility within the picked value falls with 1% close
+        /// To what it should be in a uniform distribution
+        /// For this test to work properly for a 10 element size data consider choosing a TEST_SAMPLE_SIZE higher than 100_000
+        use crate::sub_randomness::sub_randomness;
+        use std::collections::HashMap;
+
+        const TEST_SAMPLE_SIZE: usize = 300_000;
+        const N_PICKED_ELEMENTS: usize = 3;
+        const ACCURACY: f32 = 0.01;
+
+        let data = vec![1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+        let mut result = vec![vec![]];
+
+        let mut provider = sub_randomness(RANDOMNESS1);
+
+        for _ in 0..TEST_SAMPLE_SIZE - 1 {
+            let pick_result = pick(provider.next().unwrap(), N_PICKED_ELEMENTS, data.clone());
+
+            result.push(pick_result);
+        }
+
+        let mut histogram = HashMap::new();
+
+        for row in result {
+            for element in row {
+                let count = histogram.entry(element).or_insert(0);
+                *count += 1;
+            }
+        }
+        let estimated_count_for_uniform_distribution =
+            (TEST_SAMPLE_SIZE * N_PICKED_ELEMENTS / data.len()) as f32;
+        let estimation_min: i32 =
+            (estimated_count_for_uniform_distribution * (1_f32 - ACCURACY)) as i32;
+        let estimation_max: i32 =
+            (estimated_count_for_uniform_distribution * (1_f32 + ACCURACY)) as i32;
+        println!(
+            "estimation {}, max: {}, min: {}",
+            estimated_count_for_uniform_distribution, estimation_max, estimation_min
+        );
+        // This will assert on all the elements of the data 1 by 1 and check if their occurence is within the 1% expected range
+        for (bin, count) in histogram {
+            println!("{}: {}", bin, count);
+            assert!(count >= estimation_min && count <= estimation_max);
+        }
     }
 }

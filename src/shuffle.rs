@@ -62,12 +62,9 @@ pub fn shuffle<T>(randomness: [u8; 32], mut data: Vec<T>) -> Vec<T> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::RANDOMNESS1;
 
-    const RANDOMNESS1: [u8; 32] = [
-        52, 187, 72, 255, 102, 110, 115, 233, 50, 165, 124, 255, 217, 131, 112, 209, 253, 176, 108,
-        99, 102, 225, 12, 36, 82, 107, 106, 207, 99, 107, 197, 84,
-    ];
+    use super::*;
 
     #[test]
     fn shuffle_works() {

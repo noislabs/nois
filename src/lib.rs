@@ -28,3 +28,9 @@ pub use proxy::{NoisCallback, ProxyExecuteMsg, ReceiverExecuteMsg, MAX_JOB_ID_LE
 pub use select_from_weighted::select_from_weighted;
 pub use shuffle::shuffle;
 pub use sub_randomness::{sub_randomness, sub_randomness_with_key, SubRandomnessProvider};
+
+#[cfg(test)]
+const RANDOMNESS1: [u8; 32] = [
+    52, 187, 72, 255, 102, 110, 115, 233, 50, 165, 124, 255, 217, 131, 112, 209, 253, 176, 108, 99,
+    102, 225, 12, 36, 82, 107, 106, 207, 99, 107, 197, 84,
+];

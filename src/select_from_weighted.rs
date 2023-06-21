@@ -65,12 +65,9 @@ pub fn select_from_weighted<T: Clone>(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::RANDOMNESS1;
 
-    const RANDOMNESS1: [u8; 32] = [
-        52, 187, 72, 255, 102, 110, 115, 233, 50, 165, 124, 255, 217, 131, 112, 209, 253, 176, 108,
-        99, 102, 225, 12, 36, 82, 107, 106, 207, 99, 107, 197, 84,
-    ];
+    use super::*;
 
     #[test]
     fn select_from_weighted_works() {
@@ -168,9 +165,9 @@ mod tests {
                 / total_weight as f32;
             let estimated_count_for_uniform_distribution = TEST_SAMPLE_SIZE as f32 * probability;
             let estimation_min: i32 =
-                (estimated_count_for_uniform_distribution as f32 * (1_f32 - ACCURACY)) as i32;
+                (estimated_count_for_uniform_distribution * (1_f32 - ACCURACY)) as i32;
             let estimation_max: i32 =
-                (estimated_count_for_uniform_distribution as f32 * (1_f32 + ACCURACY)) as i32;
+                (estimated_count_for_uniform_distribution * (1_f32 + ACCURACY)) as i32;
             println!(
                 "estimation {}, max: {}, min: {}",
                 estimated_count_for_uniform_distribution, estimation_max, estimation_min
