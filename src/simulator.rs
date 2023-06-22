@@ -24,7 +24,7 @@ use sha2::{Digest, Sha256};
 pub fn randomness_simulator(env: &Env) -> [u8; 32] {
     let block_height = env.block.height;
     let mut hasher = Sha256::new();
-    hasher.update((block_height).to_be_bytes());
+    hasher.update(block_height.to_be_bytes());
     hasher.finalize().into()
 }
 
