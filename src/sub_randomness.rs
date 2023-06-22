@@ -115,6 +115,8 @@ pub fn sub_randomness(randomness: [u8; 32]) -> Box<SubRandomnessProvider> {
 
 #[cfg(test)]
 mod tests {
+    use cosmwasm_std::HexBinary;
+
     use crate::{coinflip, pick, RANDOMNESS1};
 
     use super::*;
@@ -276,5 +278,19 @@ mod tests {
             println!("{}: {}", bin, count);
             assert!(count >= estimation_min && count <= estimation_max);
         }
+    }
+
+    #[test]
+    fn counter_sub_randomness() {
+        let mut seed = [0u8; 32];
+        for i in 0..100 as u64 {
+            seed[24..].copy_from_slice(&i.to_be_bytes());
+            println!("-------------------------------------------------------");
+            println!("seed: {}", HexBinary::try_from(seed).unwrap());
+            let mut provider = sub_randomness(seed);
+            let subr = provider.provide();
+            println!("subr: {}", HexBinary::try_from(subr).unwrap());
+        }
+        panic!();
     }
 }
