@@ -83,7 +83,7 @@ mod tests {
         let ser = to_vec(&msg).unwrap();
         assert_eq!(
             ser,
-            br#"{"nois_receive":{"callback":{"job_id":"first","published":"1682086395000000000","randomness":"aabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccdd"}}}"#
+            br#"{"nois_receive":{"callback":{"job_id":"first","published":"1682086395000000000","randomness":"aabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccdd","relayer":"relayer"}}}"#
         );
     }
 }
