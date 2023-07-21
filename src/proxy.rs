@@ -1,5 +1,5 @@
 use cosmwasm_schema::cw_serde;
-use cosmwasm_std::{Addr, HexBinary, Timestamp};
+use cosmwasm_std::{HexBinary, Timestamp};
 
 /// Max length that the job ID is allowed to have (in bytes)
 ///
