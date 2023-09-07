@@ -31,7 +31,12 @@ use crate::prng::make_prng;
 ///
 /// let randomness = randomness_from_str("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap();
 ///
-/// let data = vec!["bob".to_string(), "mary".to_string(), "su".to_string(), "marc".to_string()];
+/// let data = vec![
+///     "bob".to_string(),
+///     "mary".to_string(),
+///     "su".to_string(),
+///     "marc".to_string()
+/// ];
 /// let shuffled = shuffle(randomness, data);
 /// // The length of the vector is the same but the order of the elements has changed
 /// assert_eq!(shuffled.len(), 4);
@@ -45,7 +50,12 @@ use crate::prng::make_prng;
 ///
 /// let randomness = randomness_from_str("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap();
 ///
-/// let original = vec!["bob".to_string(), "mary".to_string(), "su".to_string(), "marc".to_string()];
+/// let original = vec![
+///     "bob".to_string(),
+///     "mary".to_string(),
+///     "su".to_string(),
+///     "marc".to_string()
+/// ];
 /// let shuffled = shuffle(randomness, original.clone());
 /// // The length of the vector is the same but the order of the elements has changed
 /// assert_eq!(shuffled.len(), original.len());
