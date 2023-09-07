@@ -16,16 +16,9 @@ use crate::prng::make_prng;
 ///
 /// let randomness = randomness_from_str("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap();
 ///
-/// // We are randomly shuffling a vector of integers [1,2,3,4]
-/// let data = vec![
-///   1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11,
-///   12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
-///   23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
-///   34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44,
-///   45, 46, 47, 48, 49
-/// ];
+/// // Pick 6 distinct elements from a list of numbers (1-49)
+/// let data = (1..=49).collect();
 /// let picked = pick(randomness, 6, data);
-/// // The length of the vector is the same but the order of the elements has changed
 /// assert_eq!(picked.len(), 6);
 /// assert_eq!(picked, vec![7, 33, 18, 22, 8, 10]);
 /// ```
@@ -37,7 +30,12 @@ use crate::prng::make_prng;
 ///
 /// let randomness = randomness_from_str("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap();
 ///
-/// let data = vec!["bob".to_string(), "mary".to_string(), "su".to_string(), "marc".to_string()];
+/// let data = vec![
+///     "bob".to_string(),
+///     "mary".to_string(),
+///     "su".to_string(),
+///     "marc".to_string(),
+/// ];
 /// let picked = pick(randomness, 2, data);
 /// // The length of the vector is the same but the order of the elements has changed
 /// assert_eq!(picked.len(), 2);
