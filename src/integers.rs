@@ -5,8 +5,13 @@ use rand::{
 
 use crate::prng::make_prng;
 
-/// Derives a random integer in the range [begin, end], i.e. including both bounds.
+/// Derives a random integer in the range \[begin, end], i.e. including both bounds.
 /// Use this method to avoid a modulo bias.
+///
+/// Please note that changing the range for a given randomness does not necessarily
+/// lead to different outputs. So if you need to call this function multiple times,
+/// use [`nois::sub_randomness`] to get a different randomness for every call. See
+/// the second example.
 ///
 /// ## Example
 ///
@@ -17,6 +22,32 @@ use crate::prng::make_prng;
 /// let dice = int_in_range(randomness, 1, 6);
 /// assert!(dice >= 1);
 /// assert!(dice <= 6);
+/// ```
+///
+/// Caution, using different bounds for the same randomness can lead to structured results:
+///
+/// ```
+/// use nois::int_in_range;
+///
+/// # let randomness = [
+/// #     74, 71, 86, 169, 247, 21, 60, 71, 234, 24, 246, 215, 35, 73, 38, 187, 54, 59, 96, 9,
+/// #     237, 27, 215, 103, 14, 230, 28, 48, 51, 114, 203, 219,
+/// # ];
+/// assert_eq!(int_in_range(randomness, 1u16, 33), 12);
+/// assert_eq!(int_in_range(randomness, 1u16, 32), 12);
+/// assert_eq!(int_in_range(randomness, 1u16, 31), 12);
+/// assert_eq!(int_in_range(randomness, 1u16, 30), 11);
+/// assert_eq!(int_in_range(randomness, 1u16, 29), 11);
+/// assert_eq!(int_in_range(randomness, 1u16, 28), 11);
+/// assert_eq!(int_in_range(randomness, 1u16, 27), 10);
+/// assert_eq!(int_in_range(randomness, 1u16, 26), 10);
+/// assert_eq!(int_in_range(randomness, 1u16, 25), 10);
+/// assert_eq!(int_in_range(randomness, 1u16, 24), 9);
+/// assert_eq!(int_in_range(randomness, 1u16, 23), 9);
+/// assert_eq!(int_in_range(randomness, 1u16, 22), 8);
+/// assert_eq!(int_in_range(randomness, 1u16, 21), 8);
+/// assert_eq!(int_in_range(randomness, 1u16, 20), 8);
+/// assert_eq!(int_in_range(randomness, 1u16, 19), 7);
 /// ```
 pub fn int_in_range<T>(randomness: [u8; 32], begin: T, end: T) -> T
 where
