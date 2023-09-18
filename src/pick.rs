@@ -1,6 +1,7 @@
 use rand::Rng;
 
 use crate::prng::make_prng;
+use std::{collections::HashMap, fmt::Debug};
 
 /// Picks `n` elements from a given list.
 ///
@@ -16,9 +17,16 @@ use crate::prng::make_prng;
 ///
 /// let randomness = randomness_from_str("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap();
 ///
-/// // Pick 6 distinct elements from a list of numbers (1-49)
-/// let data = (1..=49).collect();
+/// // We are randomly shuffling a vector of integers [1,2,3,4]
+/// let data = vec![
+///   1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11,
+///   12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+///   23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
+///   34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44,
+///   45, 46, 47, 48, 49
+/// ];
 /// let picked = pick(randomness, 6, data);
+/// // The length of the vector is the same but the order of the elements has changed
 /// assert_eq!(picked.len(), 6);
 /// assert_eq!(picked, vec![7, 33, 18, 22, 8, 10]);
 /// ```
@@ -30,18 +38,13 @@ use crate::prng::make_prng;
 ///
 /// let randomness = randomness_from_str("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap();
 ///
-/// let data = vec![
-///     "bob".to_string(),
-///     "mary".to_string(),
-///     "su".to_string(),
-///     "marc".to_string(),
-/// ];
+/// let data = vec!["bob".to_string(), "mary".to_string(), "su".to_string(), "marc".to_string()];
 /// let picked = pick(randomness, 2, data);
 /// // The length of the vector is the same but the order of the elements has changed
 /// assert_eq!(picked.len(), 2);
 /// assert_eq!(picked, vec!["su".to_string(), "bob".to_string()]);
 /// ```
-pub fn pick<T>(randomness: [u8; 32], n: usize, mut data: Vec<T>) -> Vec<T> {
+pub fn pick_old<T>(randomness: [u8; 32], n: usize, mut data: Vec<T>) -> Vec<T> {
     if n > data.len() {
         panic!("attempt to pick more elements than the input length");
     }
@@ -55,29 +58,74 @@ pub fn pick<T>(randomness: [u8; 32], n: usize, mut data: Vec<T>) -> Vec<T> {
     data.split_off(data.len() - n)
 }
 
+pub fn pick<T: Debug + Clone>(randomness: [u8; 32], n: usize, data: &Vec<T>) -> Vec<T> {
+    if n > data.len() {
+        panic!("attempt to pick more elements than the input length");
+    }
+
+    let mut rng = make_prng(randomness);
+    let mut swap_map = HashMap::new();
+    let mut picked = Vec::with_capacity(n);
+
+    let start = data.len();
+    let end = start - n;
+    println!("Start: {:?}", start);
+    println!("end: {:?}", end);
+
+    for pointer_index in (end..start).rev() {
+        println!("------------");
+        println!("pointer_index: {}", pointer_index);
+
+        let random_index = rng.gen_range(0..=pointer_index);
+        println!("random_index: {}", random_index);
+        println!("swap_map: {:?}", swap_map);
+
+        let chosen_index = *swap_map.get(&random_index).unwrap_or(&random_index);
+        println!("chosen_index: {}", chosen_index);
+
+        let picked_value = data[chosen_index].clone(); // Clone the value
+        picked.push(picked_value);
+        println!("Picked Values: {:?}", picked);
+
+        // Set swap mapping for random_index to pointer_index
+        swap_map.insert(
+            random_index,
+            *swap_map.get(&random_index).unwrap_or(&pointer_index),
+        );
+        println!("Insert - swap_map: {:?}", swap_map);
+        // Remove pointer_index from swap_map
+        swap_map.remove(&pointer_index);
+        println!("Remove - swap_map: {:?}", swap_map);
+
+        // Print
+    }
+
+    picked
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{shuffle, RANDOMNESS1};
+    use crate::{shuffle, RANDOMNESS1, RANDOMNESS2};
 
     use super::*;
 
     #[test]
     fn pick_works() {
         let data: Vec<i32> = vec![];
-        let picked = pick(RANDOMNESS1, 0, data);
+        let picked = pick(RANDOMNESS1, 0, &data);
         assert_eq!(picked, Vec::<i32>::new());
 
         let data = vec![5];
-        let picked = pick(RANDOMNESS1, 1, data);
+        let picked = pick(RANDOMNESS1, 1, &data);
         assert_eq!(picked, vec![5]);
 
         let data = vec![1, 2, 3, 4];
-        let picked = pick(RANDOMNESS1, 3, data);
+        let picked = pick(RANDOMNESS1, 3, &data);
         assert_eq!(picked.len(), 3);
         assert_ne!(picked, vec![2, 3, 4]);
 
         // Element type is neither Copy nor Clone, i.e. the result is moved ot of the input data.
-        #[derive(PartialEq, Debug)]
+        #[derive(PartialEq, Debug, Clone)]
         struct Continent(String);
         let data = vec![
             Continent("Africa".into()),
@@ -86,11 +134,11 @@ mod tests {
             Continent("Australia".to_string()),
             Continent("Eurasia".to_string()),
         ];
-        let picked = pick(RANDOMNESS1, 2, data);
+        let picked = pick(RANDOMNESS1, 2, &data);
         assert_eq!(picked.len(), 2);
         assert_eq!(
             picked,
-            vec![Continent("America".into()), Continent("Eurasia".into())]
+            vec![Continent("Eurasia".into()), Continent("America".into())]
         );
     }
 
@@ -98,7 +146,7 @@ mod tests {
     #[should_panic = "attempt to pick more elements than the input length"]
     fn pick_panicks_for_n_greater_than_len() {
         let data = vec![1, 2, 3, 4];
-        let _picked = pick(RANDOMNESS1, 5, data);
+        let _picked = pick(RANDOMNESS1, 5, &data);
     }
 
     #[test]
@@ -119,7 +167,7 @@ mod tests {
         let mut result = vec![vec![]];
 
         for subrand in sub_randomness(RANDOMNESS1).take(TEST_SAMPLE_SIZE) {
-            result.push(pick(subrand, N_PICKED_ELEMENTS, data.clone()));
+            result.push(pick(subrand, N_PICKED_ELEMENTS, &data));
         }
 
         let mut histogram = HashMap::new();
@@ -149,28 +197,28 @@ mod tests {
 
     #[test]
     fn pick_all_performs_full_shuffle_works() {
-        let data = vec![1, 2, 3, 4, 5, 6, 7, 8];
-        let picked = pick(RANDOMNESS1, data.len(), data.clone());
-        let shuffled = shuffle(RANDOMNESS1, data);
+        let data = vec![0, 1, 2, 3, 4, 5];
+        let picked = pick(RANDOMNESS2, data.len(), &data);
+        let shuffled = shuffle(RANDOMNESS2, data);
         assert_eq!(picked, shuffled);
 
         let data = vec!["return", "if", "break", "match", "mut", "let"];
-        let picked = pick(RANDOMNESS1, data.len(), data.clone());
+        let picked = pick(RANDOMNESS1, data.len(), &data);
         let shuffled = shuffle(RANDOMNESS1, data);
         assert_eq!(picked, shuffled);
 
         let data = Vec::<u32>::new();
-        let picked = pick(RANDOMNESS1, data.len(), data.clone());
+        let picked = pick(RANDOMNESS1, data.len(), &data);
         let shuffled = shuffle(RANDOMNESS1, data);
         assert_eq!(picked, shuffled);
 
         let data = vec![true, false];
-        let picked = pick(RANDOMNESS1, data.len(), data.clone());
+        let picked = pick(RANDOMNESS1, data.len(), &data);
         let shuffled = shuffle(RANDOMNESS1, data);
         assert_eq!(picked, shuffled);
 
         let data = vec![()];
-        let picked = pick(RANDOMNESS1, data.len(), data.clone());
+        let picked = pick(RANDOMNESS1, data.len(), &data);
         let shuffled = shuffle(RANDOMNESS1, data);
         assert_eq!(picked, shuffled);
     }

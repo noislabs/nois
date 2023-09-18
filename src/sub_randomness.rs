@@ -248,7 +248,7 @@ mod tests {
         let mut provider = sub_randomness(RANDOMNESS1);
 
         for _ in 0..TEST_SAMPLE_SIZE - 1 {
-            let pick_result = pick(provider.next().unwrap(), N_PICKED_ELEMENTS, data.clone());
+            let pick_result = pick(provider.next().unwrap(), N_PICKED_ELEMENTS, &data);
 
             result.push(pick_result);
         }
