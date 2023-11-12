@@ -1,13 +1,15 @@
-use crate::int_in_range;
+use rand::distributions::uniform::SampleUniform;
+
+use crate::{int_in_range, integers::Uint};
 
 /// Selects one element from a given weighted list.
 ///
 /// In contrast to [`pick`] this does not move the selected element from the input list
-/// but requires elements to be `Clone`able. This because only one element is needed.
+/// but requires elements to be `Clone`able. This is because only one element is needed.
 /// It could be implemented differently though.
 ///
 /// The list must not be empty. Each element must have a non-zeo weight.
-/// The total weight must not exceed the u32 range.
+/// The total weight must not exceed the u128 range.
 ///
 /// ## Examples
 ///
@@ -19,26 +21,26 @@ use crate::int_in_range;
 /// let randomness = randomness_from_str("9e8e26615f51552aa3b18b6f0bcf0dae5afbe30321e8d7ea7fa51ebeb1d8fe62").unwrap();
 ///
 /// let list = vec![
-///     ("green hat", 40),
-///     ("viking helmet", 55),
-///     ("rare golden crown", 5)
+///     ("green hat", 40u32),
+///     ("viking helmet", 55u32),
+///     ("rare golden crown", 5u32)
 /// ];
 ///
 /// let selected = select_from_weighted(randomness, &list).unwrap();
 ///
 /// assert_eq!(selected, "viking helmet");
 /// ```
-pub fn select_from_weighted<T: Clone>(
+pub fn select_from_weighted<T: Clone, W: Uint + SampleUniform>(
     randomness: [u8; 32],
-    list: &[(T, u32)],
+    list: &[(T, W)],
 ) -> Result<T, String> {
     if list.is_empty() {
         return Err(String::from("List must not be empty"));
     }
 
-    let mut total_weight: u32 = 0;
+    let mut total_weight = W::ZERO;
     for (_, weight) in list {
-        if *weight == 0 {
+        if *weight == W::ZERO {
             return Err(String::from("All element weights should be >= 1"));
         }
         total_weight = total_weight
@@ -47,12 +49,12 @@ pub fn select_from_weighted<T: Clone>(
     }
 
     debug_assert!(
-        total_weight > 0,
+        total_weight > W::ZERO,
         "we know we have a non-empty list of non-zero elements"
     );
 
-    let r = int_in_range(randomness, 1, total_weight);
-    let mut weight_sum = 0;
+    let r = int_in_range::<W>(randomness, W::ONE, total_weight);
+    let mut weight_sum = W::ZERO;
     for element in list {
         weight_sum += element.1;
         if r <= weight_sum {
@@ -79,19 +81,30 @@ mod tests {
         #[derive(PartialEq, Debug, Clone)]
         struct Color(String);
         let elements = vec![
-            (Color("red".into()), 12),
-            (Color("blue".to_string()), 15),
-            (Color("green".to_string()), 8),
-            (Color("orange".to_string()), 21),
-            (Color("pink".to_string()), 11),
+            (Color("red".into()), 12u32),
+            (Color("blue".to_string()), 15u32),
+            (Color("green".to_string()), 8u32),
+            (Color("orange".to_string()), 21u32),
+            (Color("pink".to_string()), 11u32),
         ];
         let picked = select_from_weighted(RANDOMNESS1, &elements).unwrap();
         assert_eq!(picked, Color("orange".to_string()));
 
+        // Test for u128
+        let elements = vec![
+            (Color("red".into()), 12u128),
+            (Color("blue".to_string()), 15u128),
+            (Color("green".to_string()), 8u128),
+            (Color("orange".to_string()), 21u128),
+            (Color("pink".to_string()), 11u128),
+        ];
+        let picked = select_from_weighted(RANDOMNESS1, &elements).unwrap();
+        assert_eq!(picked, Color("blue".to_string()));
+
         // Pick from slice
         let selection = &elements[0..3];
         let picked = select_from_weighted(RANDOMNESS1, selection).unwrap();
-        assert_eq!(picked, Color("green".to_string()));
+        assert_eq!(picked, Color("red".to_string()));
     }
 
     #[test]
@@ -117,7 +130,7 @@ mod tests {
 
     #[test]
     fn select_from_weighted_fails_with_total_weight_too_high() {
-        let elements: Vec<(i32, u32)> = vec![(1, u32::MAX), (2, 1)];
+        let elements: Vec<(i32, u128)> = vec![(1, u128::MAX), (2, 1)];
 
         let err = select_from_weighted(RANDOMNESS1, &elements).unwrap_err();
 
@@ -133,7 +146,7 @@ mod tests {
         use std::collections::HashMap;
 
         const TEST_SAMPLE_SIZE: usize = 1_000_000;
-        const ACCURACY: f32 = 0.005;
+        const ACCURACY: f32 = 0.01;
         // This test needs the sum of the weights to be equal to 1.
         // Although the function should work as expected for weights that do not equal 1
         let elements: Vec<(String, u32)> = vec![

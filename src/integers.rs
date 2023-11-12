@@ -1,3 +1,5 @@
+use std::ops::{Add, AddAssign};
+
 use rand::{
     distributions::{uniform::SampleUniform, Distribution, Uniform},
     Rng,
@@ -109,6 +111,68 @@ impl Int for i32 {}
 impl Int for i64 {}
 impl Int for i128 {}
 impl Int for isize {}
+
+/// A trait to restrict unsigned integer types for [`select_from_weighted`]
+pub trait Uint: PartialOrd + Default + Copy + AddAssign<Self> + Add<Self> + Int {
+    const ZERO: Self;
+    const ONE: Self;
+
+    fn checked_add(self, rhs: Self) -> Option<Self>;
+}
+impl Uint for u8 {
+    const ZERO: Self = 0;
+    const ONE: Self = 1;
+
+    #[inline]
+    fn checked_add(self, rhs: Self) -> Option<Self> {
+        self.checked_add(rhs)
+    }
+}
+impl Uint for u16 {
+    const ZERO: Self = 0;
+    const ONE: Self = 1;
+
+    #[inline]
+    fn checked_add(self, rhs: Self) -> Option<Self> {
+        self.checked_add(rhs)
+    }
+}
+impl Uint for u32 {
+    const ZERO: Self = 0;
+    const ONE: Self = 1;
+
+    #[inline]
+    fn checked_add(self, rhs: Self) -> Option<Self> {
+        self.checked_add(rhs)
+    }
+}
+impl Uint for u64 {
+    const ZERO: Self = 0;
+    const ONE: Self = 1;
+
+    #[inline]
+    fn checked_add(self, rhs: Self) -> Option<Self> {
+        self.checked_add(rhs)
+    }
+}
+impl Uint for u128 {
+    const ZERO: Self = 0;
+    const ONE: Self = 1;
+
+    #[inline]
+    fn checked_add(self, rhs: Self) -> Option<Self> {
+        self.checked_add(rhs)
+    }
+}
+impl Uint for usize {
+    const ZERO: Self = 0;
+    const ONE: Self = 1;
+
+    #[inline]
+    fn checked_add(self, rhs: Self) -> Option<Self> {
+        self.checked_add(rhs)
+    }
+}
 
 #[cfg(test)]
 mod tests {
