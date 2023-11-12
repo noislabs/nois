@@ -1,4 +1,6 @@
-use crate::int_in_range;
+use rand::distributions::uniform::SampleUniform;
+
+use crate::{int_in_range, integers::Uint};
 
 /// Selects one element from a given weighted list.
 ///
@@ -26,9 +28,9 @@ use crate::int_in_range;
 ///
 /// let selected = select_from_weighted(randomness, &list).unwrap();
 ///
-/// assert_eq!(selected, "green hat");
+/// assert_eq!(selected, "viking helmet");
 /// ```
-pub fn select_from_weighted<T: Clone, W: Into<u128> + Copy>(
+pub fn select_from_weighted<T: Clone, W: Uint + SampleUniform>(
     randomness: [u8; 32],
     list: &[(T, W)],
 ) -> Result<T, String> {
@@ -36,27 +38,25 @@ pub fn select_from_weighted<T: Clone, W: Into<u128> + Copy>(
         return Err(String::from("List must not be empty"));
     }
 
-    let mut total_weight: u128 = 0;
+    let mut total_weight = W::ZERO;
     for (_, weight) in list {
-        let weight_u128: u128 = (*weight).into();
-        if weight_u128 == 0 {
+        if *weight == W::ZERO {
             return Err(String::from("All element weights should be >= 1"));
         }
         total_weight = total_weight
-            .checked_add(weight_u128)
+            .checked_add(*weight)
             .ok_or_else(|| String::from("Total weight is greater than maximum value of u32"))?;
     }
 
     debug_assert!(
-        total_weight > 0,
+        total_weight > W::ZERO,
         "we know we have a non-empty list of non-zero elements"
     );
 
-    let r = int_in_range(randomness, 1, total_weight);
-    let mut weight_sum = 0;
+    let r = int_in_range::<W>(randomness, W::ONE, total_weight);
+    let mut weight_sum = W::ZERO;
     for element in list {
-        let element_weight: u128 = element.1.into();
-        weight_sum += element_weight;
+        weight_sum += element.1;
         if r <= weight_sum {
             return Ok(element.0.clone());
         }
@@ -75,7 +75,7 @@ mod tests {
     fn select_from_weighted_works() {
         let elements: Vec<(char, u32)> = vec![('a', 1), ('b', 5), ('c', 4)];
         let picked = select_from_weighted(RANDOMNESS1, &elements).unwrap();
-        assert_eq!(picked, 'b');
+        assert_eq!(picked, 'c');
 
         // Element type is Clone but not Copy
         #[derive(PartialEq, Debug, Clone)]
@@ -88,7 +88,7 @@ mod tests {
             (Color("pink".to_string()), 11u32),
         ];
         let picked = select_from_weighted(RANDOMNESS1, &elements).unwrap();
-        assert_eq!(picked, Color("blue".to_string()));
+        assert_eq!(picked, Color("orange".to_string()));
 
         // Test for u128
         let elements = vec![
