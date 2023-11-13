@@ -1,5 +1,5 @@
 use cosmwasm_schema::cw_serde;
-use cosmwasm_std::{HexBinary, Timestamp};
+use cosmwasm_std::{Addr, HexBinary, Timestamp};
 
 /// Max length that the job ID is allowed to have (in bytes)
 ///
@@ -47,6 +47,9 @@ pub struct NoisCallback {
     pub published: Timestamp,
     /// The randomness. This is guaranteed to be 32 bytes long.
     pub randomness: HexBinary,
+    /// The relayer that brings the packet from Nois to the consumer chain.
+    /// Might be useful if the Dapp wants to incentivise the relayer operator
+    pub relayer: Addr,
 }
 
 /// This is just a helper to properly serialize the above callback.
@@ -74,12 +77,13 @@ mod tests {
                     "aabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccdd",
                 )
                 .unwrap(),
+                relayer: Addr::unchecked("relayer"),
             },
         };
         let ser = to_vec(&msg).unwrap();
         assert_eq!(
             ser,
-            br#"{"nois_receive":{"callback":{"job_id":"first","published":"1682086395000000000","randomness":"aabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccdd"}}}"#
+            br#"{"nois_receive":{"callback":{"job_id":"first","published":"1682086395000000000","randomness":"aabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccdd","relayer":"relayer"}}}"#
         );
     }
 }
