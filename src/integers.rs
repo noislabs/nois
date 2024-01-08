@@ -119,60 +119,25 @@ pub trait Uint: PartialOrd + Default + Copy + AddAssign<Self> + Add<Self> + Int 
 
     fn checked_add(self, rhs: Self) -> Option<Self>;
 }
-impl Uint for u8 {
-    const ZERO: Self = 0;
-    const ONE: Self = 1;
+// Define the macro for generating Uint trait implementations
+macro_rules! impl_uint {
+    ($($t:ty),*) => {
+        $(
+            impl Uint for $t {
+                const ZERO: Self = 0;
+                const ONE: Self = 1;
 
-    #[inline]
-    fn checked_add(self, rhs: Self) -> Option<Self> {
-        self.checked_add(rhs)
-    }
+                #[inline]
+                fn checked_add(self, rhs: Self) -> Option<Self> {
+                    <$t>::checked_add(self, rhs)
+                }
+            }
+        )*
+    };
 }
-impl Uint for u16 {
-    const ZERO: Self = 0;
-    const ONE: Self = 1;
 
-    #[inline]
-    fn checked_add(self, rhs: Self) -> Option<Self> {
-        self.checked_add(rhs)
-    }
-}
-impl Uint for u32 {
-    const ZERO: Self = 0;
-    const ONE: Self = 1;
-
-    #[inline]
-    fn checked_add(self, rhs: Self) -> Option<Self> {
-        self.checked_add(rhs)
-    }
-}
-impl Uint for u64 {
-    const ZERO: Self = 0;
-    const ONE: Self = 1;
-
-    #[inline]
-    fn checked_add(self, rhs: Self) -> Option<Self> {
-        self.checked_add(rhs)
-    }
-}
-impl Uint for u128 {
-    const ZERO: Self = 0;
-    const ONE: Self = 1;
-
-    #[inline]
-    fn checked_add(self, rhs: Self) -> Option<Self> {
-        self.checked_add(rhs)
-    }
-}
-impl Uint for usize {
-    const ZERO: Self = 0;
-    const ONE: Self = 1;
-
-    #[inline]
-    fn checked_add(self, rhs: Self) -> Option<Self> {
-        self.checked_add(rhs)
-    }
-}
+// Implement the Uint trait for each type using the macro
+impl_uint!(u8, u16, u32, u64, u128, usize);
 
 #[cfg(test)]
 mod tests {
