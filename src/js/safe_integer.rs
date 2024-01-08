@@ -1,33 +1,30 @@
+// Generic function to convert a JavaScript number to an integer type.
+fn to_integer<T>(value: f64, min: i64, max: i64) -> Option<T>
+where
+    T: TryFrom<i64>,
+{
+    let converted = value as i64;
+    if value != (converted as f64) || !(min..=max).contains(&converted) {
+        return None;
+    }
+    T::try_from(converted).ok()
+}
+
 /// Converts a JavaScript number to an i64.
 /// The number must be in the safe integer range, i.e. in
 /// [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER].
 pub fn to_safe_integer(value: f64) -> Option<i64> {
     const MIN_SAFE_INTEGER: i64 = -9007199254740991; // Number.MIN_SAFE_INTEGER
     const MAX_SAFE_INTEGER: i64 = 9007199254740991; // Number.MAX_SAFE_INTEGER
-    let converted = value as i64;
-    if value != (converted as f64) {
-        return None; // Not an integer
-    }
-    if !(MIN_SAFE_INTEGER..=MAX_SAFE_INTEGER).contains(&converted) {
-        return None;
-    }
-    Some(converted)
+    to_integer(value, MIN_SAFE_INTEGER, MAX_SAFE_INTEGER)
 }
-
 /// Converts a JavaScript number to an u32.
 /// The number must be in the safe integer range, i.e. in
 /// [0, 4294967295].
 pub fn to_u32(value: f64) -> Option<u32> {
     const MIN: i64 = 0;
     const MAX: i64 = 4294967295;
-    let converted = value as i64;
-    if value != (converted as f64) {
-        return None; // Not an integer
-    }
-    if !(MIN..=MAX).contains(&converted) {
-        return None;
-    }
-    Some(converted as u32)
+    to_integer(value, MIN, MAX)
 }
 
 #[cfg(test)]
