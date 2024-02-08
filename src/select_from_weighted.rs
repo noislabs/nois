@@ -45,7 +45,7 @@ pub fn select_from_weighted<T: Clone, W: Uint + SampleUniform>(
         }
         total_weight = total_weight
             .checked_add(*weight)
-            .ok_or_else(|| String::from("Total weight is greater than maximum value of u32"))?;
+            .ok_or_else(|| String::from("Total weight is greater than maximum value of u128"))?;
     }
 
     debug_assert!(
@@ -135,7 +135,14 @@ mod tests {
         let err = select_from_weighted(RANDOMNESS1, &elements).unwrap_err();
 
         // Check that the selected element has the expected weight
-        assert_eq!(err, "Total weight is greater than maximum value of u32");
+        assert_eq!(err, "Total weight is greater than maximum value of u128");
+    }
+
+    #[test]
+    fn select_from_weighted_fails_with_total_weight_not_too_high() {
+        let elements: Vec<(i32, u128)> = vec![(1, u32::MAX.into()), (2, 1)];
+
+        select_from_weighted(RANDOMNESS1, &elements).unwrap();
     }
 
     #[test]
