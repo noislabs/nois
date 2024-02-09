@@ -45,7 +45,7 @@ pub fn select_from_weighted<T: Clone, W: Uint + SampleUniform>(
         }
         total_weight = total_weight
             .checked_add(*weight)
-            .ok_or_else(|| String::from("Total weight is greater than maximum value of u128"))?;
+            .ok_or_else(|| String::from("Total weight is greater than maximum value"))?;
     }
 
     debug_assert!(
