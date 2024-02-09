@@ -139,7 +139,7 @@ mod tests {
     }
 
     #[test]
-    fn select_from_weighted_fails_with_total_weight_not_too_high() {
+    fn select_from_weighted_passes_with_total_weight_not_too_high() {
         let elements: Vec<(i32, u128)> = vec![(1, u32::MAX.into()), (2, 1)];
 
         select_from_weighted(RANDOMNESS1, &elements).unwrap();
