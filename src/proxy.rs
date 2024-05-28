@@ -62,7 +62,7 @@ pub enum ReceiverExecuteMsg {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use cosmwasm_std::to_vec;
+    use cosmwasm_std::to_json_vec;
 
     #[test]
     fn receiver_execute_msg_serializes_nicely() {
@@ -76,7 +76,7 @@ mod tests {
                 .unwrap(),
             },
         };
-        let ser = to_vec(&msg).unwrap();
+        let ser = to_json_vec(&msg).unwrap();
         assert_eq!(
             ser,
             br#"{"nois_receive":{"callback":{"job_id":"first","published":"1682086395000000000","randomness":"aabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccdd"}}}"#
