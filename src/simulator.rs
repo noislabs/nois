@@ -75,7 +75,7 @@ mod tests {
 
         let seed3 = randomness_simulator(&env);
         assert_ne!(seed, seed3);
-        print!("{}", HexBinary::try_from(seed3).unwrap());
+        print!("{}", HexBinary::from(seed3));
         let result = coinflip(seed3);
         assert_eq!(result, Side::Heads);
     }
