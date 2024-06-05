@@ -8,6 +8,12 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 2.0.0
+
+### Changed
+
+- Bump cosmwasm-std to version ^2
+
 ## [0.8.0] - 2023-10-13
 
 ### Added
@@ -15,6 +21,6 @@ and this project adheres to
 - Randomness simulator. This feature is a predictable randomness meant for testing, not for production
 - select_from_weighted - support more types for the weight
 
-### Changes
+### Changed
 
 - Improved documentation
